@@ -10,34 +10,31 @@ async function main()
     {
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
-        const directoryToUpload: string = core.getInput("dir_to_upload");
-        const path: string = core.getInput("path");
+        const basePath: string = core.getInput("base_path");
+        const dirToUpload: string = core.getInput("dir_to_upload");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
-
-//        const host: string = "headlinev3.no";
-//        const username: string = "headline";
-//        const path: string = "/home/headline/test_file";
-//        const port: number = 22;
-//        const privateKey: string = fs.readFileSync("./private_key/id_rsa").toString();
+        const buildNumber: string = core.getInput("build_number");
 
         let client: Client.ScpClient = await getClient(host, port, username, privateKey);
 
         // check that base exists (Versions)
-        if (!await client.exists(path))
+        if (!await client.exists(basePath))
         { 
-            await client.mkdir(path);
+            exit(1);
         }
 
-        // create sub-directory (file with incrementing value)
-        // TODO: check after build-number on node or github.. or date?
-        if (!await client.exists(path + "/4000"))
-        {
-            await client.mkdir(path + "/4000")
+        // create folder with unique value
+        if (await client.exists(basePath + "/" + buildNumber))
+        { 
+            exit(1);
         }
+        
+        // create file
+        await client.mkdir(basePath + "/" + buildNumber);
 
         // push dist-folder content to build-file
-        await client.uploadDir(directoryToUpload, path + "/4000");
+        await client.uploadDir(dirToUpload, basePath + "/" + buildNumber);
 
         /**
          * 2. push /dist folder content to this folder

@@ -7,9 +7,13 @@ inputs:
     default: "localhost"
   user: 
     description: "The username to connect with"
-    required: true
+    required: false
     default: "root"
-  path:
+  port: 
+    description: "Port to use with your connection"
+    required: false
+    default: 22
+  base_path:
     description: "Create path"
     required: true
     default: ""
@@ -17,6 +21,14 @@ inputs:
     description: "Directory to upload"
     required: true
     default: ""
+  private_key:
+    description: "Your private key as string"
+    required: true
+    default: ""
+  build_number:
+    description: "Incrementing number for upload-folder"
+    required: true
+    default: 0
 
 #outputs:
 #  time: # id of output

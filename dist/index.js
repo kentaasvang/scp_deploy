@@ -41,37 +41,41 @@ var Client = require("node-scp");
 var process_1 = require("process");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var host, username, path, port, privateKey, client, error_1;
+        var host, username, basePath, dirToUpload, port, privateKey, buildNumber, client, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 9, , 10]);
+                    _a.trys.push([0, 6, , 7]);
                     host = core.getInput("host");
                     username = core.getInput("user");
-                    path = core.getInput("path");
+                    basePath = core.getInput("base_path");
+                    dirToUpload = core.getInput("dir_to_upload");
                     port = parseInt(core.getInput("port"));
                     privateKey = core.getInput("private_key");
+                    buildNumber = core.getInput("build_number");
                     return [4 /*yield*/, getClient(host, port, username, privateKey)];
                 case 1:
                     client = _a.sent();
-                    return [4 /*yield*/, client.exists(path)];
+                    return [4 /*yield*/, client.exists(basePath)];
                 case 2:
-                    if (!!(_a.sent())) return [3 /*break*/, 4];
-                    return [4 /*yield*/, client.mkdir(path)];
+                    // check that base exists (Versions)
+                    if (!(_a.sent())) {
+                        (0, process_1.exit)(1);
+                    }
+                    return [4 /*yield*/, client.exists(basePath + "/" + buildNumber)];
                 case 3:
+                    // create folder with unique value
+                    if (_a.sent()) {
+                        (0, process_1.exit)(1);
+                    }
+                    // create file
+                    return [4 /*yield*/, client.mkdir(basePath + "/" + buildNumber)];
+                case 4:
+                    // create file
                     _a.sent();
-                    _a.label = 4;
-                case 4: return [4 /*yield*/, client.exists(path + "/4000")];
+                    // push dist-folder content to build-file
+                    return [4 /*yield*/, client.uploadDir(dirToUpload, basePath + "/" + buildNumber)];
                 case 5:
-                    if (!!(_a.sent())) return [3 /*break*/, 7];
-                    return [4 /*yield*/, client.mkdir(path + "/4000")];
-                case 6:
-                    _a.sent();
-                    _a.label = 7;
-                case 7: 
-                // push dist-folder content to build-file
-                return [4 /*yield*/, client.uploadDir("./dist", path + "/4000")];
-                case 8:
                     // push dist-folder content to build-file
                     _a.sent();
                     /**
@@ -80,13 +84,13 @@ function main() {
                     // 3. Create folder in versionsk
                     client.close();
                     (0, process_1.exit)(0);
-                    return [3 /*break*/, 10];
-                case 9:
+                    return [3 /*break*/, 7];
+                case 6:
                     error_1 = _a.sent();
                     core.setFailed(error_1.message);
                     (0, process_1.exit)(1);
-                    return [3 /*break*/, 10];
-                case 10: return [2 /*return*/];
+                    return [3 /*break*/, 7];
+                case 7: return [2 /*return*/];
             }
         });
     });
