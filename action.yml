@@ -1,0 +1,21 @@
+name: "scp deployment"
+description: "Deploy files to remote over SSH"
+inputs:
+  host:
+    description: "The IP or domain-name of your server"
+    required: true
+    default: "localhost"
+  user: 
+    description: "The username to connect with"
+    required: true
+    default: "root"
+  password: # FOR TESTING
+    description: "Password"
+    required: true
+    default: ""
+#outputs:
+#  time: # id of output
+#    description: 'The time we greeted you'
+runs:
+  using: 'node16'
+  main: "dist/index.js"
