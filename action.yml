@@ -9,8 +9,12 @@ inputs:
     description: "The username to connect with"
     required: true
     default: "root"
-  password: # FOR TESTING
+  password: # FOR TESTING / SHOULD USE KEY FROM GIRHUB SECRETS
     description: "Password"
+    required: true
+    default: ""
+  path:
+    description: "Create this path"
     required: true
     default: ""
 #outputs:
