@@ -8,17 +8,17 @@ async function main()
 {
     try 
     {
-    //    const host: string = core.getInput("host");
-    //    const username: string = core.getInput("user");
-    //    const path: string = core.getInput("path");
-    //    const port: string = core.getInput("port");
-    //    const privateKey: string = core.getInput("private_key");
+        const host: string = core.getInput("host");
+        const username: string = core.getInput("user");
+        const path: string = core.getInput("path");
+        const port: number = parseInt(core.getInput("port"));
+        const privateKey: string = core.getInput("private_key");
 
-        const host: string = "headlinev3.no";
-        const username: string = "headline";
-        const path: string = "/home/headline/test_file";
-        const port: number = 22;
-        const privateKey: string = fs.readFileSync("./private_key/id_rsa").toString();
+//        const host: string = "headlinev3.no";
+//        const username: string = "headline";
+//        const path: string = "/home/headline/test_file";
+//        const port: number = 22;
+//        const privateKey: string = fs.readFileSync("./private_key/id_rsa").toString();
 
         let client: Client.ScpClient = await getClient(host, port, username, privateKey);
 

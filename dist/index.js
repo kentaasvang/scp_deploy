@@ -38,7 +38,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var core = require("@actions/core");
 var Client = require("node-scp");
-var fs = require("fs");
 var process_1 = require("process");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
@@ -47,11 +46,11 @@ function main() {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 9, , 10]);
-                    host = "headlinev3.no";
-                    username = "headline";
-                    path = "/home/headline/test_file";
-                    port = 22;
-                    privateKey = fs.readFileSync("./private_key/id_rsa").toString();
+                    host = core.getInput("host");
+                    username = core.getInput("user");
+                    path = core.getInput("path");
+                    port = parseInt(core.getInput("port"));
+                    privateKey = core.getInput("private_key");
                     return [4 /*yield*/, getClient(host, port, username, privateKey)];
                 case 1:
                     client = _a.sent();
