@@ -1,46 +1,79 @@
 import core = require("@actions/core");
 import github = require("@actions/github");
 import Client = require('node-scp');
+import fs = require("fs");
+import { exit } from "process";
 
-try 
+async function main()
 {
-    const host: string = core.getInput("host");
-    const user: string = core.getInput("user");
-    const password: string = core.getInput("password");
-    const path: string = core.getInput("path");
-    const port: string = core.getInput("port");
+    try 
+    {
+    //    const host: string = core.getInput("host");
+    //    const username: string = core.getInput("user");
+    //    const path: string = core.getInput("path");
+    //    const port: string = core.getInput("port");
+    //    const privateKey: string = core.getInput("private_key");
 
-    console.log(`host: ${host}`);
-    console.log(`user: ${user}`);
-    console.log(`password: ${password}`);
+        const host: string = "headlinev3.no";
+        const username: string = "headline";
+        const path: string = "/home/headline/test_file";
+        const port: number = 22;
+        const privateKey: string = fs.readFileSync("./private_key/id_rsa").toString();
 
-    /**
-     * pseudo-code
-     * 1. create folder on remote server with incrementing values
-     * 2. push /dist folder content to this folder
-     */
-    test(host, port, user, password, path);
+        let client: Client.ScpClient = await getClient(host, port, username, privateKey);
+
+        // check that base exists (Versions)
+        if (!await client.exists(path))
+        { 
+            await client.mkdir(path);
+        }
+
+        // create sub-directory (file with incrementing value)
+        // TODO: check after build-number on node or github.. or date?
+        if (!await client.exists(path + "/4000"))
+        {
+            await client.mkdir(path + "/4000")
+        }
+
+        // push dist-folder content to build-file
+        await client.uploadDir("./dist", path + "/4000");
+
+        /**
+         * 2. push /dist folder content to this folder
+         */
+
+        // 3. Create folder in versionsk
+        client.close();
+        exit(0);
+    }
+
+    catch (error) 
+    {
+        core.setFailed(error.message); 
+        exit(1);
+    }
 }
 
-catch (error) 
-{
-    core.setFailed(error.message); 
-}
-
-async function test(host: string, port: string, username: string, password: string, path: string) 
+async function getClient
+(
+    host: string, 
+    port: number,
+    username: string, 
+    privateKey: string
+) : Promise<Client.ScpClient>
 {
     let client = await Client.Client(
     {
         host: host,
         port: port,
         username: username,
-        password: password,
-        path: path
-        // privateKey: fs.readFileSync('./key.pem'),
-        // passphrase: 'your key passphrase',
+        privateKey: privateKey,
     });
 
-    await client.mkdir(path)
+//    await client.mkdir(path)
 
-    client.close() // remember to close connection after you finish
+//    client.close() // remember to close connection after you finish
+    return client;
 }
+
+main();

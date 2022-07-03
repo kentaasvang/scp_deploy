@@ -38,26 +38,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var core = require("@actions/core");
 var Client = require("node-scp");
-try {
-    var host = core.getInput("host");
-    var user = core.getInput("user");
-    var password = core.getInput("password");
-    var path = core.getInput("path");
-    var port = core.getInput("port");
-    console.log("host: ".concat(host));
-    console.log("user: ".concat(user));
-    console.log("password: ".concat(password));
-    /**
-     * pseudo-code
-     * 1. create folder on remote server with incrementing values
-     * 2. push /dist folder content to this folder
-     */
-    test(host, port, user, password, path);
+var fs = require("fs");
+var process_1 = require("process");
+function main() {
+    return __awaiter(this, void 0, void 0, function () {
+        var host, username, path, port, privateKey, client, error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 9, , 10]);
+                    host = "headlinev3.no";
+                    username = "headline";
+                    path = "/home/headline/test_file";
+                    port = 22;
+                    privateKey = fs.readFileSync("./private_key/id_rsa").toString();
+                    return [4 /*yield*/, getClient(host, port, username, privateKey)];
+                case 1:
+                    client = _a.sent();
+                    return [4 /*yield*/, client.exists(path)];
+                case 2:
+                    if (!!(_a.sent())) return [3 /*break*/, 4];
+                    return [4 /*yield*/, client.mkdir(path)];
+                case 3:
+                    _a.sent();
+                    _a.label = 4;
+                case 4: return [4 /*yield*/, client.exists(path + "/4000")];
+                case 5:
+                    if (!!(_a.sent())) return [3 /*break*/, 7];
+                    return [4 /*yield*/, client.mkdir(path + "/4000")];
+                case 6:
+                    _a.sent();
+                    _a.label = 7;
+                case 7: 
+                // push dist-folder content to build-file
+                return [4 /*yield*/, client.uploadDir("./dist", path + "/4000")];
+                case 8:
+                    // push dist-folder content to build-file
+                    _a.sent();
+                    /**
+                     * 2. push /dist folder content to this folder
+                     */
+                    // 3. Create folder in versionsk
+                    client.close();
+                    (0, process_1.exit)(0);
+                    return [3 /*break*/, 10];
+                case 9:
+                    error_1 = _a.sent();
+                    core.setFailed(error_1.message);
+                    (0, process_1.exit)(1);
+                    return [3 /*break*/, 10];
+                case 10: return [2 /*return*/];
+            }
+        });
+    });
 }
-catch (error) {
-    core.setFailed(error.message);
-}
-function test(host, port, username, password, path) {
+function getClient(host, port, username, privateKey) {
     return __awaiter(this, void 0, void 0, function () {
         var client;
         return __generator(this, function (_a) {
@@ -66,19 +101,15 @@ function test(host, port, username, password, path) {
                         host: host,
                         port: port,
                         username: username,
-                        password: password,
-                        path: path
-                        // privateKey: fs.readFileSync('./key.pem'),
-                        // passphrase: 'your key passphrase',
+                        privateKey: privateKey
                     })];
                 case 1:
                     client = _a.sent();
-                    return [4 /*yield*/, client.mkdir(path)];
-                case 2:
-                    _a.sent();
-                    client.close(); // remember to close connection after you finish
-                    return [2 /*return*/];
+                    //    await client.mkdir(path)
+                    //    client.close() // remember to close connection after you finish
+                    return [2 /*return*/, client];
             }
         });
     });
 }
+main();
