@@ -43,6 +43,7 @@ try {
     var user = core.getInput("user");
     var password = core.getInput("password");
     var path = core.getInput("path");
+    var port = core.getInput("port");
     console.log("host: ".concat(host));
     console.log("user: ".concat(user));
     console.log("password: ".concat(password));
@@ -51,19 +52,19 @@ try {
      * 1. create folder on remote server with incrementing values
      * 2. push /dist folder content to this folder
      */
-    test(host, user, password, path);
+    test(host, port, user, password, path);
 }
 catch (error) {
     core.setFailed(error.message);
 }
-function test(host, username, password, path) {
+function test(host, port, username, password, path) {
     return __awaiter(this, void 0, void 0, function () {
         var client;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, Client.Client({
                         host: host,
-                        port: 22,
+                        port: port,
                         username: username,
                         password: password,
                         path: path

@@ -8,6 +8,7 @@ try
     const user: string = core.getInput("user");
     const password: string = core.getInput("password");
     const path: string = core.getInput("path");
+    const port: string = core.getInput("port");
 
     console.log(`host: ${host}`);
     console.log(`user: ${user}`);
@@ -18,7 +19,7 @@ try
      * 1. create folder on remote server with incrementing values
      * 2. push /dist folder content to this folder
      */
-    test(host, user, password, path);
+    test(host, port, user, password, path);
 }
 
 catch (error) 
@@ -26,12 +27,12 @@ catch (error)
     core.setFailed(error.message); 
 }
 
-async function test(host: string, username: string, password: string, path: string) 
+async function test(host: string, port: string, username: string, password: string, path: string) 
 {
     let client = await Client.Client(
     {
         host: host,
-        port: 22,
+        port: port,
         username: username,
         password: password,
         path: path
