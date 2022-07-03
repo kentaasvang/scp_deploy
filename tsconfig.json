@@ -3,5 +3,6 @@
         "rootDirs": ["src"],
         "outDir": "dist",
         "lib": ["es2018", "dom"],
+        "noImplicitAny": true
     }
 }
