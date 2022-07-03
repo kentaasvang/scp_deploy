@@ -14,7 +14,7 @@ inputs:
     required: true
     default: ""
   path:
-    description: "Create this path"
+    description: "Create path"
     required: true
     default: ""
 #outputs:
