@@ -9,14 +9,15 @@ inputs:
     description: "The username to connect with"
     required: true
     default: "root"
-  password: # FOR TESTING / SHOULD USE KEY FROM GIRHUB SECRETS
-    description: "Password"
-    required: true
-    default: ""
   path:
     description: "Create path"
     required: true
     default: ""
+  dir_to_upload:
+    description: "Directory to upload"
+    required: true
+    default: ""
+
 #outputs:
 #  time: # id of output
 #    description: 'The time we greeted you'

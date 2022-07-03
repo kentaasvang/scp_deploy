@@ -10,6 +10,7 @@ async function main()
     {
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
+        const directoryToUpload: string = core.getInput("dir_to_upload");
         const path: string = core.getInput("path");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
@@ -36,7 +37,7 @@ async function main()
         }
 
         // push dist-folder content to build-file
-        await client.uploadDir("./dist", path + "/4000");
+        await client.uploadDir(directoryToUpload, path + "/4000");
 
         /**
          * 2. push /dist folder content to this folder
