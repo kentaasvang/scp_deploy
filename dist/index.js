@@ -40,7 +40,6 @@ var node_scp_1 = require("node-scp");
 var process_1 = require("process");
 var serverClient_1 = require("./serverClient");
 var core = require("@actions/core");
-var fs = require("fs");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
         var config, client, action, error_1;
@@ -135,20 +134,13 @@ var Config = /** @class */ (function () {
     function Config() {
     }
     Config.get = function () {
-        //        const host: string = core.getInput("host");
-        //        const username: string = core.getInput("user");
-        //        const basePath: string = core.getInput("base_path");
-        //        const dirToUpload: string = core.getInput("dir_to_upload");
-        //        const port: number = parseInt(core.getInput("port"));
-        //        const privateKey: string = core.getInput("private_key");
-        //        const buildNumber: string = core.getInput("build_number");
-        var host = "headlinev3.no";
-        var username = "headline";
-        var basePath = "/home/headline/Versions";
-        var dirToUpload = "./dist";
-        var port = 22;
-        var privateKey = fs.readFileSync("private_key/id_rsa").toString();
-        var buildNumber = "42";
+        var host = core.getInput("host");
+        var username = core.getInput("user");
+        var basePath = core.getInput("base_path");
+        var dirToUpload = core.getInput("dir_to_upload");
+        var port = parseInt(core.getInput("port"));
+        var privateKey = core.getInput("private_key");
+        var buildNumber = core.getInput("build_number");
         return {
             actionConfig: {
                 basePath: basePath,

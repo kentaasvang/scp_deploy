@@ -81,20 +81,13 @@ class Config
 {
     public static get(): IConfiguration
     {
-//        const host: string = core.getInput("host");
-//        const username: string = core.getInput("user");
-//        const basePath: string = core.getInput("base_path");
-//        const dirToUpload: string = core.getInput("dir_to_upload");
-//        const port: number = parseInt(core.getInput("port"));
-//        const privateKey: string = core.getInput("private_key");
-//        const buildNumber: string = core.getInput("build_number");
-        const host: string = "headlinev3.no";
-        const username: string = "headline";
-        const basePath: string = "/home/headline/Versions";
-        const dirToUpload: string = "./dist";
-        const port: number = 22;
-        const privateKey: string = fs.readFileSync("private_key/id_rsa").toString();
-        const buildNumber: string = "42";
+        const host: string = core.getInput("host");
+        const username: string = core.getInput("user");
+        const basePath: string = core.getInput("base_path");
+        const dirToUpload: string = core.getInput("dir_to_upload");
+        const port: number = parseInt(core.getInput("port"));
+        const privateKey: string = core.getInput("private_key");
+        const buildNumber: string = core.getInput("build_number");
 
         return {
             actionConfig: {
