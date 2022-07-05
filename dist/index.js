@@ -36,83 +36,133 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var core = require("@actions/core");
-var Client = require("node-scp");
+var node_scp_1 = require("node-scp");
 var process_1 = require("process");
+var serverClient_1 = require("./serverClient");
+var core = require("@actions/core");
+var fs = require("fs");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var host, username, basePath, dirToUpload, port, privateKey, buildNumber, client, error_1;
+        var config, client, action, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    host = core.getInput("host");
-                    username = core.getInput("user");
-                    basePath = core.getInput("base_path");
-                    dirToUpload = core.getInput("dir_to_upload");
-                    port = parseInt(core.getInput("port"));
-                    privateKey = core.getInput("private_key");
-                    buildNumber = core.getInput("build_number");
-                    return [4 /*yield*/, getClient(host, port, username, privateKey)];
+                    _a.trys.push([0, 2, , 3]);
+                    config = Config.get();
+                    client = new serverClient_1.ServerClient(config.serverConfig);
+                    action = new Action(config.actionConfig, client);
+                    return [4 /*yield*/, action.run()];
                 case 1:
-                    client = _a.sent();
-                    return [4 /*yield*/, client.exists(basePath)];
-                case 2:
-                    // check that base exists (Versions)
-                    if (!(_a.sent())) {
-                        (0, process_1.exit)(1);
-                    }
-                    return [4 /*yield*/, client.exists(basePath + "/" + buildNumber)];
-                case 3:
-                    // create folder with unique value
-                    if (_a.sent()) {
-                        (0, process_1.exit)(1);
-                    }
-                    // create file
-                    return [4 /*yield*/, client.mkdir(basePath + "/" + buildNumber)];
-                case 4:
-                    // create file
                     _a.sent();
-                    // push dist-folder content to build-file
-                    return [4 /*yield*/, client.uploadDir(dirToUpload, basePath + "/" + buildNumber)];
-                case 5:
-                    // push dist-folder content to build-file
-                    _a.sent();
-                    /**
-                     * 2. push /dist folder content to this folder
-                     */
-                    // 3. Create folder in versionsk
-                    client.close();
                     (0, process_1.exit)(0);
-                    return [3 /*break*/, 7];
-                case 6:
+                    return [3 /*break*/, 3];
+                case 2:
                     error_1 = _a.sent();
                     core.setFailed(error_1.message);
                     (0, process_1.exit)(1);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
-function getClient(host, port, username, privateKey) {
-    return __awaiter(this, void 0, void 0, function () {
-        var client;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, Client.Client({
-                        host: host,
-                        port: port,
-                        username: username,
-                        privateKey: privateKey
-                    })];
-                case 1:
-                    client = _a.sent();
-                    //    await client.mkdir(path)
-                    //    client.close() // remember to close connection after you finish
-                    return [2 /*return*/, client];
-            }
+var Action = /** @class */ (function () {
+    function Action(config, client) {
+        this.config = config;
+        this.client = client;
+    }
+    Action.prototype.run = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: 
+                    // let client: ScpClient = await this.getClient(this.config.serverConfig);
+                    return [4 /*yield*/, this.client.initiate()];
+                    case 1:
+                        // let client: ScpClient = await this.getClient(this.config.serverConfig);
+                        _a.sent();
+                        return [4 /*yield*/, this.client.exists(this.config.basePath)];
+                    case 2:
+                        // check that base exists (Versions)
+                        if (!(_a.sent())) {
+                            (0, process_1.exit)(1);
+                        }
+                        return [4 /*yield*/, this.client.exists(this.config.basePath + "/" + this.config.buildNumber)];
+                    case 3:
+                        // create folder with unique value
+                        if (_a.sent()) {
+                            (0, process_1.exit)(1);
+                        }
+                        // create file
+                        return [4 /*yield*/, this.client.mkdir(this.config.basePath + "/" + this.config.buildNumber)];
+                    case 4:
+                        // create file
+                        _a.sent();
+                        // push dist-folder content to build-file
+                        return [4 /*yield*/, this.client.uploadDir(this.config.dirToUpload, this.config.basePath + "/" + this.config.buildNumber)];
+                    case 5:
+                        // push dist-folder content to build-file
+                        _a.sent();
+                        return [4 /*yield*/, this.client.close()];
+                    case 6:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
         });
-    });
-}
+    };
+    Action.prototype.getClient = function (credentials) {
+        return __awaiter(this, void 0, void 0, function () {
+            var client;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, (0, node_scp_1.Client)({
+                            host: credentials.host,
+                            port: credentials.port,
+                            username: credentials.username,
+                            privateKey: credentials.privateKey
+                        })];
+                    case 1:
+                        client = _a.sent();
+                        return [2 /*return*/, client];
+                }
+            });
+        });
+    };
+    return Action;
+}());
+var Config = /** @class */ (function () {
+    function Config() {
+    }
+    Config.get = function () {
+        //        const host: string = core.getInput("host");
+        //        const username: string = core.getInput("user");
+        //        const basePath: string = core.getInput("base_path");
+        //        const dirToUpload: string = core.getInput("dir_to_upload");
+        //        const port: number = parseInt(core.getInput("port"));
+        //        const privateKey: string = core.getInput("private_key");
+        //        const buildNumber: string = core.getInput("build_number");
+        var host = "headlinev3.no";
+        var username = "headline";
+        var basePath = "/home/headline/Versions";
+        var dirToUpload = "./dist";
+        var port = 22;
+        var privateKey = fs.readFileSync("private_key/id_rsa").toString();
+        var buildNumber = "42";
+        return {
+            actionConfig: {
+                basePath: basePath,
+                dirToUpload: dirToUpload,
+                buildNumber: buildNumber
+            },
+            serverConfig: {
+                host: host,
+                username: username,
+                port: port,
+                privateKey: privateKey
+            }
+        };
+    };
+    return Config;
+}());
 main();
