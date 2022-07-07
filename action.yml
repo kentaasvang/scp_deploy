@@ -16,6 +16,7 @@ inputs:
     description: "Your private key as string"
     required: true
     default: ""
+
   working_directory:
     description: ""
     required: true
@@ -27,9 +28,6 @@ inputs:
     required: false
     default: false
 
-#outputs:
-#  time: # id of output
-#    description: 'The time we greeted you'
 runs:
   using: 'node16'
   main: "dist/index.js"

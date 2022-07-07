@@ -1,46 +1,36 @@
-import { Client, ScpClient } from "node-scp";
 import { exit } from "process";
 import { IServerClient } from "./interfaces/serverClient.interface";
 import { ServerClient } from "./serverClient";
 import { IConfiguration } from "./interfaces/configuration.interface";
 
-import core = require("@actions/core");
 import fs = require("fs");
 
+import core = require("@actions/core");
 
-async function main(): Promise<number>
-{
-    try 
-    {
+async function main(): Promise<number> {
+    try {
         let config: IConfiguration = Config.get();
         let client: IServerClient = new ServerClient(config.serverConfig, config.attributes);
-        let action: Action = new Action(config.actionConfig, client);
+        let action: Action = new Action(client);
 
         await action.run()
 
         exit(0);
-    }
-    catch (error: any) 
-    {
+    } catch (error: any) {
         core.setFailed(error.message); 
         exit(1);
     }
 }
 
 
-class Action 
-{
-    config: IActionConfig;
+class Action {
     client: IServerClient;
 
-    public constructor(config: IActionConfig, client: IServerClient)
-    {
-        this.config = config;
+    public constructor(client: IServerClient) {
         this.client = client;
     }
 
-    public async run(): Promise<void>
-    {
+    public async run(): Promise<void> {
         await this.client.deploy();
     }
 }
@@ -48,22 +38,17 @@ class Action
 
 class Config
 {
-    public static get(): IConfiguration
-    {
+    public static get(): IConfiguration {
+
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
         const workingDirectory: string = core.getInput("workingDirectory");
-        const dirToUpload: string = core.getInput("dir_to_upload");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
         const versioning: boolean = core.getInput("versioning") == "true";
         const uploadDirectory: string = core.getInput("upload_directory");
 
         return {
-            actionConfig: {
-                workingDirectory: workingDirectory,
-                dirToUpload: dirToUpload,
-            },
             serverConfig: {
                 host: host,
                 username: username,

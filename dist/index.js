@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var process_1 = require("process");
 var serverClient_1 = require("./serverClient");
+var fs = require("fs");
 var core = require("@actions/core");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
@@ -48,7 +49,7 @@ function main() {
                     _a.trys.push([0, 2, , 3]);
                     config = Config.get();
                     client = new serverClient_1.ServerClient(config.serverConfig, config.attributes);
-                    action = new Action(config.actionConfig, client);
+                    action = new Action(client);
                     return [4 /*yield*/, action.run()];
                 case 1:
                     _a.sent();
@@ -65,8 +66,7 @@ function main() {
     });
 }
 var Action = /** @class */ (function () {
-    function Action(config, client) {
-        this.config = config;
+    function Action(client) {
         this.client = client;
     }
     Action.prototype.run = function () {
@@ -87,19 +87,23 @@ var Config = /** @class */ (function () {
     function Config() {
     }
     Config.get = function () {
-        var host = core.getInput("host");
-        var username = core.getInput("user");
-        var workingDirectory = core.getInput("workingDirectory");
-        var dirToUpload = core.getInput("dir_to_upload");
-        var port = parseInt(core.getInput("port"));
-        var privateKey = core.getInput("private_key");
-        var versioning = core.getInput("versioning") == "true";
-        var uploadDirectory = core.getInput("upload_directory");
+        /*
+        const host: string = core.getInput("host");
+        const username: string = core.getInput("user");
+        const workingDirectory: string = core.getInput("workingDirectory");
+        const port: number = parseInt(core.getInput("port"));
+        const privateKey: string = core.getInput("private_key");
+        const versioning: boolean = core.getInput("versioning") == "true";
+        const uploadDirectory: string = core.getInput("upload_directory");
+       */
+        var host = "headlinev3.no";
+        var username = "headline";
+        var port = 22;
+        var workingDirectory = "/home/headline";
+        var privateKey = fs.readFileSync("./private_key/id_rsa").toString();
+        var uploadDirectory = "./dist";
+        var versioning = false;
         return {
-            actionConfig: {
-                workingDirectory: workingDirectory,
-                dirToUpload: dirToUpload
-            },
             serverConfig: {
                 host: host,
                 username: username,
