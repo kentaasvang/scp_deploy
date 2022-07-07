@@ -1,77 +1,68 @@
-import core = require("@actions/core");
-import github = require("@actions/github");
-import Client = require('node-scp');
-import fs = require("fs");
 import { exit } from "process";
+import { IServerClient } from "./interfaces/serverClient.interface";
+import { ServerClient } from "./serverClient";
+import { IConfiguration } from "./interfaces/configuration.interface";
 
-async function main()
-{
-    try 
-    {
-        const host: string = core.getInput("host");
-        const username: string = core.getInput("user");
-        const basePath: string = core.getInput("base_path");
-        const dirToUpload: string = core.getInput("dir_to_upload");
-        const port: number = parseInt(core.getInput("port"));
-        const privateKey: string = core.getInput("private_key");
-        const buildNumber: string = core.getInput("build_number");
+import fs = require("fs");
 
-        let client: Client.ScpClient = await getClient(host, port, username, privateKey);
+import core = require("@actions/core");
 
-        // check that base exists (Versions)
-        if (!await client.exists(basePath))
-        { 
-            exit(1);
-        }
+async function main(): Promise<number> {
+    try {
+        let config: IConfiguration = Config.get();
+        let client: IServerClient = new ServerClient(config.serverConfig, config.attributes);
+        let action: Action = new Action(client);
 
-        // create folder with unique value
-        if (await client.exists(basePath + "/" + buildNumber))
-        { 
-            exit(1);
-        }
-        
-        // create file
-        await client.mkdir(basePath + "/" + buildNumber);
+        await action.run()
 
-        // push dist-folder content to build-file
-        await client.uploadDir(dirToUpload, basePath + "/" + buildNumber);
-
-        /**
-         * 2. push /dist folder content to this folder
-         */
-
-        // 3. Create folder in versionsk
-        client.close();
         exit(0);
-    }
-
-    catch (error) 
-    {
+    } catch (error: any) {
         core.setFailed(error.message); 
         exit(1);
     }
 }
 
-async function getClient
-(
-    host: string, 
-    port: number,
-    username: string, 
-    privateKey: string
-) : Promise<Client.ScpClient>
-{
-    let client = await Client.Client(
-    {
-        host: host,
-        port: port,
-        username: username,
-        privateKey: privateKey,
-    });
 
-//    await client.mkdir(path)
+class Action {
+    client: IServerClient;
 
-//    client.close() // remember to close connection after you finish
-    return client;
+    public constructor(client: IServerClient) {
+        this.client = client;
+    }
+
+    public async run(): Promise<void> {
+        await this.client.deploy();
+    }
 }
+
+
+class Config
+{
+    public static get(): IConfiguration {
+
+        const host: string = core.getInput("host");
+        const username: string = core.getInput("user");
+        const workingDirectory: string = core.getInput("workingDirectory");
+        const port: number = parseInt(core.getInput("port"));
+        const privateKey: string = core.getInput("private_key");
+        const versioning: boolean = core.getInput("versioning") == "true";
+        const uploadDirectory: string = core.getInput("upload_directory");
+
+        return {
+            serverConfig: {
+                host: host,
+                username: username,
+                port: port,
+                privateKey: privateKey
+            },
+            attributes: {
+                workingDirectory: workingDirectory,
+                uploadDirectory: uploadDirectory,
+                versioning: versioning
+            }
+        }
+    }
+}
+
 
 main();
