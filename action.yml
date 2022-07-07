@@ -1,34 +1,31 @@
 name: "scp deployment"
 description: "Deploy files to remote over SSH"
 inputs:
+
   host:
     description: "The IP or domain-name of your server"
     required: true
-    default: "localhost"
   user: 
     description: "The username to connect with"
-    required: false
-    default: "root"
+    required: true
   port: 
     description: "Port to use with your connection"
     required: false
     default: 22
-  base_path:
-    description: "Create path"
-    required: true
-    default: ""
-  dir_to_upload:
-    description: "Directory to upload"
-    required: true
-    default: ""
   private_key:
     description: "Your private key as string"
     required: true
     default: ""
-  build_number:
-    description: "Incrementing number for upload-folder"
+  working_directory:
+    description: ""
     required: true
-    default: 0
+  upload_directory:
+    description: "Directory to upload"
+    required: true
+  versioning:
+    description: ""
+    required: false
+    default: false
 
 #outputs:
 #  time: # id of output

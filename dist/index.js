@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var node_scp_1 = require("node-scp");
 var process_1 = require("process");
 var serverClient_1 = require("./serverClient");
 var core = require("@actions/core");
@@ -48,7 +47,7 @@ function main() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     config = Config.get();
-                    client = new serverClient_1.ServerClient(config.serverConfig);
+                    client = new serverClient_1.ServerClient(config.serverConfig, config.attributes);
                     action = new Action(config.actionConfig, client);
                     return [4 /*yield*/, action.run()];
                 case 1:
@@ -74,56 +73,10 @@ var Action = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: 
-                    // let client: ScpClient = await this.getClient(this.config.serverConfig);
-                    return [4 /*yield*/, this.client.initiate()];
+                    case 0: return [4 /*yield*/, this.client.deploy()];
                     case 1:
-                        // let client: ScpClient = await this.getClient(this.config.serverConfig);
-                        _a.sent();
-                        return [4 /*yield*/, this.client.exists(this.config.basePath)];
-                    case 2:
-                        // check that base exists (Versions)
-                        if (!(_a.sent())) {
-                            (0, process_1.exit)(1);
-                        }
-                        return [4 /*yield*/, this.client.exists(this.config.basePath + "/" + this.config.buildNumber)];
-                    case 3:
-                        // create folder with unique value
-                        if (_a.sent()) {
-                            (0, process_1.exit)(1);
-                        }
-                        // create file
-                        return [4 /*yield*/, this.client.mkdir(this.config.basePath + "/" + this.config.buildNumber)];
-                    case 4:
-                        // create file
-                        _a.sent();
-                        // push dist-folder content to build-file
-                        return [4 /*yield*/, this.client.uploadDir(this.config.dirToUpload, this.config.basePath + "/" + this.config.buildNumber)];
-                    case 5:
-                        // push dist-folder content to build-file
-                        _a.sent();
-                        return [4 /*yield*/, this.client.close()];
-                    case 6:
                         _a.sent();
                         return [2 /*return*/];
-                }
-            });
-        });
-    };
-    Action.prototype.getClient = function (credentials) {
-        return __awaiter(this, void 0, void 0, function () {
-            var client;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, (0, node_scp_1.Client)({
-                            host: credentials.host,
-                            port: credentials.port,
-                            username: credentials.username,
-                            privateKey: credentials.privateKey
-                        })];
-                    case 1:
-                        client = _a.sent();
-                        return [2 /*return*/, client];
                 }
             });
         });
@@ -136,22 +89,27 @@ var Config = /** @class */ (function () {
     Config.get = function () {
         var host = core.getInput("host");
         var username = core.getInput("user");
-        var basePath = core.getInput("base_path");
+        var workingDirectory = core.getInput("workingDirectory");
         var dirToUpload = core.getInput("dir_to_upload");
         var port = parseInt(core.getInput("port"));
         var privateKey = core.getInput("private_key");
-        var buildNumber = core.getInput("build_number");
+        var versioning = core.getInput("versioning") == "true";
+        var uploadDirectory = core.getInput("upload_directory");
         return {
             actionConfig: {
-                basePath: basePath,
-                dirToUpload: dirToUpload,
-                buildNumber: buildNumber
+                workingDirectory: workingDirectory,
+                dirToUpload: dirToUpload
             },
             serverConfig: {
                 host: host,
                 username: username,
                 port: port,
                 privateKey: privateKey
+            },
+            attributes: {
+                workingDirectory: workingDirectory,
+                uploadDirectory: uploadDirectory,
+                versioning: versioning
             }
         };
     };

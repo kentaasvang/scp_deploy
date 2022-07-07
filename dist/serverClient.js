@@ -39,10 +39,11 @@ exports.__esModule = true;
 exports.ServerClient = void 0;
 var node_scp_1 = require("node-scp");
 var ServerClient = /** @class */ (function () {
-    function ServerClient(connectionCredentials) {
+    function ServerClient(connectionCredentials, attributes) {
         this.serverConfig = connectionCredentials;
+        this.attributes = attributes;
     }
-    ServerClient.prototype.initiate = function () {
+    ServerClient.prototype.deploy = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a;
             return __generator(this, function (_b) {
@@ -57,12 +58,23 @@ var ServerClient = /** @class */ (function () {
                             })];
                     case 1:
                         _a.clientInstance = _b.sent();
+                        return [4 /*yield*/, this.workingDirectoryExists()];
+                    case 2:
+                        if (!(_b.sent())) {
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, this.upload()];
+                    case 3:
+                        _b.sent();
+                        return [4 /*yield*/, this.close()];
+                    case 4:
+                        _b.sent();
                         return [2 /*return*/];
                 }
             });
         });
     };
-    ServerClient.prototype.exists = function (path) {
+    ServerClient.prototype.workingDirectoryExists = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -70,35 +82,24 @@ var ServerClient = /** @class */ (function () {
                         if (this.clientInstance === undefined) {
                             return [2 /*return*/, false];
                         }
-                        return [4 /*yield*/, this.clientInstance.exists(path)];
+                        return [4 /*yield*/, this.clientInstance.exists(this.attributes.workingDirectory)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
-    ServerClient.prototype.mkdir = function (path) {
+    ServerClient.prototype.upload = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var uploadDir, workingdirectory;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (this.clientInstance === undefined) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, this.clientInstance.mkdir(path)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    ServerClient.prototype.uploadDir = function (src, dest) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (this.clientInstance === undefined) {
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, this.clientInstance.uploadDir(src, dest)];
+                        uploadDir = this.attributes.uploadDirectory;
+                        workingdirectory = this.attributes.workingDirectory;
+                        return [4 /*yield*/, this.clientInstance.uploadDir(uploadDir, workingdirectory)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });

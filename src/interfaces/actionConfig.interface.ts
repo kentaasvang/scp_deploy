@@ -1,7 +1,6 @@
 
 interface IActionConfig
 {
-    readonly basePath: string;
+    readonly workingDirectory: string;
     readonly dirToUpload: string;
-    readonly buildNumber: string;
 }
