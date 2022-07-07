@@ -1,14 +1,10 @@
 import { ScpClient } from "node-scp";
+import { IAttributes } from "./attributes.interface";
 
-export interface IServerClient 
-{
+export interface IServerClient {
     readonly serverConfig: IServerConfig;
-
+    readonly attributes: IAttributes;
     clientInstance: ScpClient | undefined;
 
-    initiate(): Promise<void>;
-    mkdir(path: string): Promise<void>;
-    uploadDir(src: string, dest: string): Promise<void>;
-    close(): Promise<void>;
-    exists(path: string): Promise<string | boolean>
+    deploy(): Promise<void>;
 }

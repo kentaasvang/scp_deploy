@@ -1,6 +1,6 @@
+import { IAttributes } from "./attributes.interface";
 
-interface IConfiguration
-{
-    readonly actionConfig: IActionConfig;
+export interface IConfiguration {
     readonly serverConfig: IServerConfig;
+    readonly attributes: IAttributes;
 }

@@ -1,6 +1,6 @@
 
-export interface IAttributes
-{
+export interface IAttributes {
+    workingDirectory: string;
+    uploadDirectory: string;
     versioning: boolean;
-    createRootIfNotExists: boolean;
 }
