@@ -38,6 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.ServerClient = void 0;
 var node_scp_1 = require("node-scp");
+var process_1 = require("process");
+var SSH = require("simple-ssh");
 var ServerClient = /** @class */ (function () {
     function ServerClient(connectionCredentials, attributes) {
         this.serverConfig = connectionCredentials;
@@ -45,7 +47,7 @@ var ServerClient = /** @class */ (function () {
     }
     ServerClient.prototype.deploy = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
+            var _a, version;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -63,16 +65,91 @@ var ServerClient = /** @class */ (function () {
                         if (!(_b.sent())) {
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, this.upload()];
+                        if (!this.attributes.versioning) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this.checkNeededDirectoriesExists()];
                     case 3:
+                        // check that workingDirectory contains Version and Current folder
+                        if (!(_b.sent()))
+                            (0, process_1.exit)(1);
+                        return [4 /*yield*/, this.generateNewVersionNumber()];
+                    case 4:
+                        version = _b.sent();
+                        // create new folder with build number
+                        this.attributes.workingDirectory = this.attributes.versionsDirectory + "/" + version;
+                        console.log("here 1");
+                        console.log(version);
+                        console.log(this.attributes.workingDirectory);
+                        return [4 /*yield*/, this.clientInstance.mkdir(this.attributes.workingDirectory)];
+                    case 5:
+                        _b.sent();
+                        // TODO: create symlink from new build folder to current
+                        return [4 /*yield*/, this.createSymlinkFromWorkingDirToCurrent()];
+                    case 6:
+                        // TODO: create symlink from new build folder to current
+                        _b.sent();
+                        _b.label = 7;
+                    case 7: return [4 /*yield*/, this.upload()];
+                    case 8:
                         _b.sent();
                         return [4 /*yield*/, this.close()];
-                    case 4:
+                    case 9:
                         _b.sent();
                         return [2 /*return*/];
                 }
             });
         });
+    };
+    ServerClient.prototype.checkNeededDirectoriesExists = function () {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var result, dirNames, pubDir, workDir;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.list(this.attributes.workingDirectory))];
+                    case 1:
+                        result = _b.sent();
+                        dirNames = this.getNamesFromList(result);
+                        pubDir = dirNames.find(function (dir) { return dir == "Current"; });
+                        workDir = dirNames.find(function (dir) { return dir == "Versions"; });
+                        if (pubDir === undefined || workDir === undefined) {
+                            console.log("False!");
+                            return [2 /*return*/, false];
+                        }
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    ServerClient.prototype.generateNewVersionNumber = function () {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var versionFolders, dirNames, dirNamesAsNumber;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.list(this.attributes.versionsDirectory))];
+                    case 1:
+                        versionFolders = _b.sent();
+                        dirNames = this.getNamesFromList(versionFolders);
+                        if (dirNames.length == 0)
+                            return [2 /*return*/, 1];
+                        dirNamesAsNumber = [];
+                        dirNames.forEach(function (dirName) {
+                            dirNamesAsNumber.push(parseInt(dirName, 10));
+                        });
+                        // sort in ascending order
+                        dirNamesAsNumber.sort(function (a, b) { return a - b; });
+                        console.log(dirNamesAsNumber);
+                        return [2 /*return*/, ++dirNamesAsNumber[dirNamesAsNumber.length - 1]];
+                }
+            });
+        });
+    };
+    ServerClient.prototype.getNamesFromList = function (result) {
+        var dirNames = [];
+        Object.keys(result).forEach(function (idx) {
+            dirNames.push(result[idx].name);
+        });
+        return dirNames;
     };
     ServerClient.prototype.workingDirectoryExists = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -116,6 +193,24 @@ var ServerClient = /** @class */ (function () {
                         return [4 /*yield*/, this.clientInstance.close()];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
+            });
+        });
+    };
+    ServerClient.prototype.createSymlinkFromWorkingDirToCurrent = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var ssh;
+            return __generator(this, function (_a) {
+                ssh = new SSH({
+                    host: this.serverConfig.host,
+                    user: this.serverConfig.username,
+                    key: this.serverConfig.privateKey
+                });
+                ssh.exec("ln -sfn /home/headline/Versions/2 /home/headline/Current", {
+                    out: function (out) {
+                        console.log(out);
+                    }
+                }).start();
+                return [2 /*return*/];
             });
         });
     };

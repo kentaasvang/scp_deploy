@@ -1,5 +1,5 @@
 name: "scp deployment"
-description: "Deploy files to remote over SSH"
+description: "Deploy files to remote server over SSH"
 inputs:
 
   host:
@@ -24,9 +24,17 @@ inputs:
     description: "Directory to upload"
     required: true
   versioning:
-    description: ""
+    description: "publish new deploys in folders with a build number representing it's version. (newer versions get higher build number)"
     required: false
     default: false
+  public_directory:
+    description: "Public folder accessable from webclient"
+    required: false
+    default: "Current"
+  versions_directory:
+    description: "Name of folder to keep different versions"
+    required: false
+    default: "Versions"
 
 runs:
   using: 'node16'

@@ -39,7 +39,7 @@ class Action {
 class Config
 {
     public static get(): IConfiguration {
-
+/*
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
         const workingDirectory: string = core.getInput("workingDirectory");
@@ -47,6 +47,18 @@ class Config
         const privateKey: string = core.getInput("private_key");
         const versioning: boolean = core.getInput("versioning") == "true";
         const uploadDirectory: string = core.getInput("upload_directory");
+        const publicDirectory: string = core.getInput("public_directory");
+        const versionsDirectory: string = core.getInput("versions_directory");
+        */
+        const host: string = "headlinev3.no";
+        const username: string = "headline";
+        const workingDirectory: string = "/home/headline";
+        const port: number = 22;
+        const privateKey: string = fs.readFileSync("private_key/id_rsa").toString();
+        const versioning: boolean = true;
+        const uploadDirectory: string = "./dist";
+        const publicDirectory: string = "Current";
+        const versionsDirectory: string = "Versions";
 
         return {
             serverConfig: {
@@ -58,7 +70,9 @@ class Config
             attributes: {
                 workingDirectory: workingDirectory,
                 uploadDirectory: uploadDirectory,
-                versioning: versioning
+                versioning: versioning,
+                publicDirectory: workingDirectory + "/" + publicDirectory,
+                versionsDirectory: workingDirectory + "/" + versionsDirectory,
             }
         }
     }

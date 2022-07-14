@@ -88,21 +88,25 @@ var Config = /** @class */ (function () {
     }
     Config.get = function () {
         /*
-        const host: string = core.getInput("host");
-        const username: string = core.getInput("user");
-        const workingDirectory: string = core.getInput("workingDirectory");
-        const port: number = parseInt(core.getInput("port"));
-        const privateKey: string = core.getInput("private_key");
-        const versioning: boolean = core.getInput("versioning") == "true";
-        const uploadDirectory: string = core.getInput("upload_directory");
-       */
+                const host: string = core.getInput("host");
+                const username: string = core.getInput("user");
+                const workingDirectory: string = core.getInput("workingDirectory");
+                const port: number = parseInt(core.getInput("port"));
+                const privateKey: string = core.getInput("private_key");
+                const versioning: boolean = core.getInput("versioning") == "true";
+                const uploadDirectory: string = core.getInput("upload_directory");
+                const publicDirectory: string = core.getInput("public_directory");
+                const versionsDirectory: string = core.getInput("versions_directory");
+                */
         var host = "headlinev3.no";
         var username = "headline";
-        var port = 22;
         var workingDirectory = "/home/headline";
-        var privateKey = fs.readFileSync("./private_key/id_rsa").toString();
+        var port = 22;
+        var privateKey = fs.readFileSync("private_key/id_rsa").toString();
+        var versioning = true;
         var uploadDirectory = "./dist";
-        var versioning = false;
+        var publicDirectory = "Current";
+        var versionsDirectory = "Versions";
         return {
             serverConfig: {
                 host: host,
@@ -113,7 +117,9 @@ var Config = /** @class */ (function () {
             attributes: {
                 workingDirectory: workingDirectory,
                 uploadDirectory: uploadDirectory,
-                versioning: versioning
+                versioning: versioning,
+                publicDirectory: workingDirectory + "/" + publicDirectory,
+                versionsDirectory: workingDirectory + "/" + versionsDirectory
             }
         };
     };
