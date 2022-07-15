@@ -20,7 +20,7 @@ inputs:
   working_directory:
     description: ""
     required: true
-  upload_directory:
+  source_folder:
     description: "Directory to upload"
     required: true
   versioning:

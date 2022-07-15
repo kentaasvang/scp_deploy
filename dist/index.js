@@ -38,8 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var process_1 = require("process");
 var serverClient_1 = require("./serverClient");
-var fs = require("fs");
-var core = require("@actions/core");
+var fs = require("fs"), core = require("@actions/core");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
         var config, client, action, error_1;
@@ -48,7 +47,7 @@ function main() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     config = Config.get();
-                    client = new serverClient_1.ServerClient(config.serverConfig, config.attributes);
+                    client = new serverClient_1.ServerClient(config);
                     action = new Action(client);
                     return [4 /*yield*/, action.run()];
                 case 1:
@@ -94,17 +93,17 @@ var Config = /** @class */ (function () {
                 const port: number = parseInt(core.getInput("port"));
                 const privateKey: string = core.getInput("private_key");
                 const versioning: boolean = core.getInput("versioning") == "true";
-                const uploadDirectory: string = core.getInput("upload_directory");
+                const uploadDirectory: string = core.getInput("source_folder");
                 const publicDirectory: string = core.getInput("public_directory");
                 const versionsDirectory: string = core.getInput("versions_directory");
                 */
         var host = "headlinev3.no";
         var username = "headline";
-        var workingDirectory = "/home/headline";
         var port = 22;
         var privateKey = fs.readFileSync("private_key/id_rsa").toString();
         var versioning = true;
-        var uploadDirectory = "./dist";
+        var sourceFolder = "./dist";
+        var workingDirectory = "/home/headline";
         var publicDirectory = "Current";
         var versionsDirectory = "Versions";
         return {
@@ -116,7 +115,7 @@ var Config = /** @class */ (function () {
             },
             attributes: {
                 workingDirectory: workingDirectory,
-                uploadDirectory: uploadDirectory,
+                sourceFolder: sourceFolder,
                 versioning: versioning,
                 publicDirectory: workingDirectory + "/" + publicDirectory,
                 versionsDirectory: workingDirectory + "/" + versionsDirectory

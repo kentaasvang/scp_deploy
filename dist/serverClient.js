@@ -41,9 +41,9 @@ var node_scp_1 = require("node-scp");
 var process_1 = require("process");
 var SSH = require("simple-ssh");
 var ServerClient = /** @class */ (function () {
-    function ServerClient(connectionCredentials, attributes) {
-        this.serverConfig = connectionCredentials;
-        this.attributes = attributes;
+    function ServerClient(config) {
+        this.serverConfig = config.serverConfig;
+        this.attributes = config.attributes;
     }
     ServerClient.prototype.deploy = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -62,30 +62,31 @@ var ServerClient = /** @class */ (function () {
                         _a.clientInstance = _b.sent();
                         return [4 /*yield*/, this.workingDirectoryExists()];
                     case 2:
-                        if (!(_b.sent())) {
+                        /**
+                         * if not versioning
+                         *      delete content of public folder
+                         *      upload new files to public folder
+                         *
+                         * if versioning
+                         *      create new folder with version as name
+                         *      upload files to publish files to new folder
+                         */
+                        if (!(_b.sent()))
                             return [2 /*return*/];
-                        }
                         if (!this.attributes.versioning) return [3 /*break*/, 7];
                         return [4 /*yield*/, this.checkNeededDirectoriesExists()];
                     case 3:
-                        // check that workingDirectory contains Version and Current folder
                         if (!(_b.sent()))
                             (0, process_1.exit)(1);
                         return [4 /*yield*/, this.generateNewVersionNumber()];
                     case 4:
                         version = _b.sent();
-                        // create new folder with build number
                         this.attributes.workingDirectory = this.attributes.versionsDirectory + "/" + version;
-                        console.log("here 1");
-                        console.log(version);
-                        console.log(this.attributes.workingDirectory);
                         return [4 /*yield*/, this.clientInstance.mkdir(this.attributes.workingDirectory)];
                     case 5:
                         _b.sent();
-                        // TODO: create symlink from new build folder to current
                         return [4 /*yield*/, this.createSymlinkFromWorkingDirToCurrent()];
                     case 6:
-                        // TODO: create symlink from new build folder to current
                         _b.sent();
                         _b.label = 7;
                     case 7: return [4 /*yield*/, this.upload()];
@@ -112,7 +113,6 @@ var ServerClient = /** @class */ (function () {
                         pubDir = dirNames.find(function (dir) { return dir == "Current"; });
                         workDir = dirNames.find(function (dir) { return dir == "Versions"; });
                         if (pubDir === undefined || workDir === undefined) {
-                            console.log("False!");
                             return [2 /*return*/, false];
                         }
                         return [2 /*return*/, true];
@@ -167,16 +167,16 @@ var ServerClient = /** @class */ (function () {
     };
     ServerClient.prototype.upload = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var uploadDir, workingdirectory;
+            var deployFiles, workingdirectory;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (this.clientInstance === undefined) {
                             return [2 /*return*/];
                         }
-                        uploadDir = this.attributes.uploadDirectory;
+                        deployFiles = this.attributes.sourceFolder;
                         workingdirectory = this.attributes.workingDirectory;
-                        return [4 /*yield*/, this.clientInstance.uploadDir(uploadDir, workingdirectory)];
+                        return [4 /*yield*/, this.clientInstance.uploadDir(deployFiles, workingdirectory)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -205,7 +205,7 @@ var ServerClient = /** @class */ (function () {
                     user: this.serverConfig.username,
                     key: this.serverConfig.privateKey
                 });
-                ssh.exec("ln -sfn /home/headline/Versions/2 /home/headline/Current", {
+                ssh.exec("ln -sfn /home/headline/Versions/1 /home/headline/Current", {
                     out: function (out) {
                         console.log(out);
                     }

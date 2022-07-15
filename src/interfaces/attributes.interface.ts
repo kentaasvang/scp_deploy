@@ -1,7 +1,7 @@
 
 export interface IAttributes {
     workingDirectory: string;
-    uploadDirectory: string;
+    sourceFolder: string;
     versioning: boolean;
     publicDirectory: string;
     versionsDirectory: string,
