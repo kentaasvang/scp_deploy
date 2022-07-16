@@ -2,11 +2,15 @@ import { exit } from "process";
 import { IServerClient } from "./interfaces/serverClient.interface";
 import { ServerClient } from "./serverClient";
 import { IConfiguration } from "./interfaces/configuration.interface";
+import { ILogger } from "./interfaces/logger.interface";
 
 
 const 
     fs = require("fs"),
-    core = require("@actions/core");
+    core = require("@actions/core"),
+    logger: ILogger = require("pino")({
+        level: "debug"
+    });
 
 
 async function main(): Promise<number> 
@@ -14,8 +18,19 @@ async function main(): Promise<number>
     try 
     {
         let config: IConfiguration = Config.get();
-        let client: IServerClient = new ServerClient(config);
+        let client: IServerClient = new ServerClient(config, logger);
         let action: Action = new Action(client);
+
+        const configLogSafe = 
+        { 
+            ...config, 
+            serverConfig: 
+            {
+                ...config.serverConfig,
+                privateKey: "***"
+            }
+        };
+        logger.info(`Created ${typeof(client)} with configuration: ${JSON.stringify(configLogSafe)}`);
 
         await action.run()
         exit(0);
@@ -46,8 +61,9 @@ class Action
 
 class Config
 {
-    public static get(): IConfiguration {
-/*
+    public static get(): IConfiguration 
+    {
+        /*
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
         const workingDirectory: string = core.getInput("workingDirectory");
@@ -64,20 +80,24 @@ class Config
         const privateKey: string = fs.readFileSync("private_key/id_rsa").toString();
         const versioning: boolean = true;
         const sourceFolder: string = "./dist";
+        const destinationFolder: string = ".";
         const workingDirectory: string = "/home/headline";
         const publicDirectory: string = "Current";
         const versionsDirectory: string = "Versions";
 
         return {
-            serverConfig: {
+            serverConfig: 
+            {
                 host: host,
                 username: username,
                 port: port,
                 privateKey: privateKey
             },
-            attributes: {
+            attributes: 
+            {
                 workingDirectory: workingDirectory,
                 sourceFolder: sourceFolder,
+                destinationFolder: destinationFolder,
                 versioning: versioning,
                 publicDirectory: workingDirectory + "/" + publicDirectory,
                 versionsDirectory: workingDirectory + "/" + versionsDirectory,
