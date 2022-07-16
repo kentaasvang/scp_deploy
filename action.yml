@@ -23,6 +23,10 @@ inputs:
   source_folder:
     description: "Directory to upload"
     required: true
+  destination_folder:
+    description: "Directory to upload files into"
+    required: false
+    default: "."
   versioning:
     description: "publish new deploys in folders with a build number representing it's version. (newer versions get higher build number)"
     required: false
