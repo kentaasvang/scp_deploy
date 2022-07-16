@@ -18,6 +18,7 @@ async function main(): Promise<number>
     try 
     {
         let config: IConfiguration = Config.get();
+        validateConfig(config);
         let client: IServerClient = new ServerClient(config, logger);
         let action: Action = new Action(client);
 
@@ -30,7 +31,7 @@ async function main(): Promise<number>
                 privateKey: "***"
             }
         };
-        logger.info(`Created ${typeof(client)} with configuration: ${JSON.stringify(configLogSafe)}`);
+        logger.info(`Created client w/ config: ${JSON.stringify(configLogSafe)}`);
 
         await action.run()
         exit(0);
@@ -42,6 +43,14 @@ async function main(): Promise<number>
     }
 }
 
+function validateConfig(config: IConfiguration) 
+{
+    if (config.attributes.createSymlink && !config.attributes.publicDirectory)
+    {
+        logger.error(`Can't create symbolic link when public directory isn't specified.`);
+        exit(1);
+    }
+}
 
 class Action 
 {
@@ -66,13 +75,14 @@ class Config
         /*
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
-        const workingDirectory: string = core.getInput("workingDirectory");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
         const versioning: boolean = core.getInput("versioning") == "true";
         const uploadDirectory: string = core.getInput("source_folder");
         const publicDirectory: string = core.getInput("public_directory");
         const versionsDirectory: string = core.getInput("versions_directory");
+        const createFolders: boolean = core.getInput("create_folders");
+        const createSymlink: boolean = core.getInput("create_symlink");
         */
         const host: string = "headlinev3.no";
         const username: string = "headline";
@@ -80,10 +90,10 @@ class Config
         const privateKey: string = fs.readFileSync("private_key/id_rsa").toString();
         const versioning: boolean = true;
         const sourceFolder: string = "./dist";
-        const destinationFolder: string = ".";
-        const workingDirectory: string = "/home/headline";
-        const publicDirectory: string = "Current";
-        const versionsDirectory: string = "Versions";
+        const destinationFolder: string = "/home/headline/TestFolder";
+        const publicDirectory: string = "/home/headline/Current";
+        const createFolders: boolean = true;
+        const createSymlink: boolean = true;
 
         return {
             serverConfig: 
@@ -95,16 +105,16 @@ class Config
             },
             attributes: 
             {
-                workingDirectory: workingDirectory,
                 sourceFolder: sourceFolder,
                 destinationFolder: destinationFolder,
                 versioning: versioning,
-                publicDirectory: workingDirectory + "/" + publicDirectory,
-                versionsDirectory: workingDirectory + "/" + versionsDirectory,
+                publicDirectory: publicDirectory,
+                createFolders: createFolders,
+                createSymlink: createSymlink
             }
         }
     }
 }
 
-
 main();
+

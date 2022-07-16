@@ -1,6 +1,6 @@
 import { countReset } from "console";
 import Client, { ScpClient } from "node-scp";
-import { exit } from "process";
+import { exit, versions } from "process";
 import { IAttributes } from "./interfaces/attributes.interface";
 import { IConfiguration } from "./interfaces/configuration.interface";
 import { ILogger } from "./interfaces/logger.interface";
@@ -36,81 +36,80 @@ export class ServerClient implements IServerClient
             privateKey: this.serverConfig.privateKey,
         });
 
-        /**
-         * if not versioning
-         *      delete content of destination-folder
-         *      1 .upload content to destination-folder
-         * 
-         * if versioning
-         *      create new folder with versionname in destination-folder
-         *      1. upload files source-files to new folder 
-         */
-
-        if (!await this.workingDirectoryExists())
+        if (!await this.directoryExists(this.attributes.destinationFolder))
         {
-            this.logger.error(`working directory ${this.attributes.workingDirectory} doesn't exist on client. Exiting`);
-            exit(1);
+            await this.createDirectory(this.attributes.destinationFolder);
         }
 
         if (this.attributes.versioning)
         {
             this.logger.info("Deploying with versioning");
-            await this.checkNeededDirectoriesExists();
+            let version = await this.getVersion();
 
-            let version = await this.generateNewVersionNumber();
+            this.attributes.destinationFolder += `/${version}`;
+            this.logger.info(`Changed destinationFolder to ${this.attributes.destinationFolder}`);
 
-            this.attributes.workingDirectory = this.attributes.versionsDirectory + "/" + version;
-            this.logger.info(`Changed attributes.workingDirectory to ${this.attributes.workingDirectory}`);
-            await this.clientInstance.mkdir(this.attributes.workingDirectory);
-            this.logger.info(`Created workingDirectory ${this.attributes.workingDirectory} on remote server`);
+            await this.createDirectory(this.attributes.destinationFolder, true);
+            this.logger.info(`Created folder with ${this.attributes.destinationFolder} on remote server`);
 
-            await this.createSymlink(this.attributes.workingDirectory, this.attributes?.publicDirectory);
+            if (this.attributes.createSymlink)
+            {
+                await this.createSymlink(this.attributes.destinationFolder, this.attributes.publicDirectory);
+            }
         }
 
         await this.upload();
-        await this.close();
-    }
-
-    private async checkNeededDirectoriesExists(): Promise<void>
-    {
-            
-        let result = await this.clientInstance?.list(this.attributes.workingDirectory);
-        let dirNames: string[] = this.getNamesFromList(result);
-
-        // TODO: should not be hardcoded! 
-        let pubDir: string | undefined = dirNames.find(dir => dir == "Current");
-        let workDir: string | undefined = dirNames.find(dir => dir == "Versions");
-
-        if (pubDir === undefined || workDir === undefined)
-        {
-            this.logger.error(`Missing directories ${pubDir} and ${workDir} for use with versioning`);
-            exit(1);
-        }
+        await this.closeConnection();
     }
     
-    private async generateNewVersionNumber(): Promise<number> 
+    private async directoryExists(path: string): Promise<boolean> 
     {
-
-        if (this.attributes.versionsDirectory === undefined)
-            return -1;
-
-        let versionFolders = await this.clientInstance?.list(this.attributes.versionsDirectory)
-
-        let dirNames: string[] = this.getNamesFromList(versionFolders);
-
-        if (dirNames.length == 0) return 1;
-
-        let dirNamesAsNumber: number[] = [];
-
-        dirNames.forEach(dirName => {
-            dirNamesAsNumber.push(parseInt(dirName, 10));
-        });
-
-        dirNamesAsNumber.sort((a, b) => a - b );
-
-        return ++dirNamesAsNumber[dirNamesAsNumber.length - 1];
+        let result = await this.clientInstance?.exists(path);
+        this.logger.info(`Checking to see if '${path}' exists, result was: ${result}`);
+        return result !== false;
     }
 
+    private async createDirectory(dirPath: string, force: boolean = false): Promise<void>
+    {
+        if (!this.attributes.createFolders && !force)
+        {
+            this.logger.error(`Can't create folder '${dirPath}' with create folder-attr set to ${this.attributes.createFolders}`);
+            exit(1);
+        }
+
+        this.logger.info(`Creating new directory: '${dirPath}`);
+        await this.clientInstance?.mkdir(dirPath);
+    }
+    
+    private async getVersion(): Promise<number> 
+    {
+        let versions = await this.getExistingVersions();
+
+        if (versions.length == 0) 
+        {
+            this.logger.info("No prior versions found, initiating first version number 1");
+            return 1;
+        }
+
+        let versionsAsNumbers: number[] = [];
+
+        // parse string to ints and push to array
+        versions.forEach(version => {
+            versionsAsNumbers.push(parseInt(version, 10));
+        });
+
+        // sort array in ascending order
+        versionsAsNumbers.sort((a, b) => a - b );
+
+        return ++versionsAsNumbers[versionsAsNumbers.length - 1];
+    }
+
+    private async getExistingVersions(): Promise<string[]>
+    {
+        let versions = await this.clientInstance?.list(this.attributes.destinationFolder)
+        let dirNames: string[] = this.getNamesFromList(versions);
+        return dirNames;
+    }
 
     private getNamesFromList(result: any): string[] 
     {
@@ -124,19 +123,15 @@ export class ServerClient implements IServerClient
         return dirNames;
     }
 
-    private async workingDirectoryExists(): Promise<string | boolean | undefined> 
-    {
-        return await this.clientInstance?.exists(this.attributes.workingDirectory);
-    }
 
     private async upload(): Promise<void> 
     {
         let sourceFolder: string = this.attributes.sourceFolder;
-        let workingDirectory: string = this.attributes.workingDirectory;
+        let destinationFolder: string = this.attributes.destinationFolder;
 
-        await this.cleanDirectory(workingDirectory);
-        await this.clientInstance?.uploadDir(sourceFolder, workingDirectory);
-        this.logger.info(`Uploaded source-files to '${workingDirectory}'`);
+        await this.cleanDirectory(destinationFolder);
+        await this.clientInstance?.uploadDir(sourceFolder, destinationFolder);
+        this.logger.info(`Uploaded source-files to '${destinationFolder}'`);
     }
 
     private async cleanDirectory(workingDirectory: string): Promise<void> 
@@ -145,7 +140,7 @@ export class ServerClient implements IServerClient
         this.logger.info(`Cleaned directory '${workingDirectory}'`)
     }
 
-    private async close(): Promise<void | undefined> 
+    private async closeConnection(): Promise<void | undefined> 
     {
         this.logger.info("Closing connection to server..");
         return await this.clientInstance?.close();

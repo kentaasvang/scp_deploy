@@ -17,16 +17,12 @@ inputs:
     required: true
     default: ""
 
-  working_directory:
-    description: ""
-    required: true
   source_folder:
     description: "Directory to upload"
     required: true
   destination_folder:
     description: "Directory to upload files into"
-    required: false
-    default: "."
+    required: true
   versioning:
     description: "publish new deploys in folders with a build number representing it's version. (newer versions get higher build number)"
     required: false
@@ -35,10 +31,14 @@ inputs:
     description: "Public folder accessable from webclient"
     required: false
     default: "Current"
-  versions_directory:
-    description: "Name of folder to keep different versions"
+  create_folders: 
+    description: "Create directories on server if it does not exist"
     required: false
-    default: "Versions"
+    default: false
+  create_symlink:
+    description: "Create a symbolic link from newest version to public directory, required that public directory is set"
+    required: false
+    default: false
 
 runs:
   using: 'node16'

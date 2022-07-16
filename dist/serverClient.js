@@ -47,13 +47,12 @@ var ServerClient = /** @class */ (function () {
         this.logger = logger;
     }
     ServerClient.prototype.deploy = function () {
-        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var _b, version;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var _a, version;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        _b = this;
+                        _a = this;
                         return [4 /*yield*/, (0, node_scp_1["default"])({
                                 host: this.serverConfig.host,
                                 port: this.serverConfig.port,
@@ -61,93 +60,112 @@ var ServerClient = /** @class */ (function () {
                                 privateKey: this.serverConfig.privateKey
                             })];
                     case 1:
-                        _b.clientInstance = _c.sent();
-                        return [4 /*yield*/, this.workingDirectoryExists()];
+                        _a.clientInstance = _b.sent();
+                        return [4 /*yield*/, this.directoryExists(this.attributes.destinationFolder)];
                     case 2:
-                        /**
-                         * if not versioning
-                         *      delete content of destination-folder
-                         *      1 .upload content to destination-folder
-                         *
-                         * if versioning
-                         *      create new folder with versionname in destination-folder
-                         *      1. upload files source-files to new folder
-                         */
-                        if (!(_c.sent())) {
-                            this.logger.error("working directory ".concat(this.attributes.workingDirectory, " doesn't exist on client. Exiting"));
-                            (0, process_1.exit)(1);
-                        }
-                        if (!this.attributes.versioning) return [3 /*break*/, 7];
-                        this.logger.info("Deploying with versioning");
-                        return [4 /*yield*/, this.checkNeededDirectoriesExists()];
+                        if (!!(_b.sent())) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.createDirectory(this.attributes.destinationFolder)];
                     case 3:
-                        _c.sent();
-                        return [4 /*yield*/, this.generateNewVersionNumber()];
+                        _b.sent();
+                        _b.label = 4;
                     case 4:
-                        version = _c.sent();
-                        this.attributes.workingDirectory = this.attributes.versionsDirectory + "/" + version;
-                        this.logger.info("Changed attributes.workingDirectory to ".concat(this.attributes.workingDirectory));
-                        return [4 /*yield*/, this.clientInstance.mkdir(this.attributes.workingDirectory)];
+                        if (!this.attributes.versioning) return [3 /*break*/, 8];
+                        this.logger.info("Deploying with versioning");
+                        return [4 /*yield*/, this.getVersion()];
                     case 5:
-                        _c.sent();
-                        this.logger.info("Created workingDirectory ".concat(this.attributes.workingDirectory, " on remote server"));
-                        return [4 /*yield*/, this.createSymlink(this.attributes.workingDirectory, (_a = this.attributes) === null || _a === void 0 ? void 0 : _a.publicDirectory)];
+                        version = _b.sent();
+                        this.attributes.destinationFolder += "/".concat(version);
+                        this.logger.info("Changed destinationFolder to ".concat(this.attributes.destinationFolder));
+                        return [4 /*yield*/, this.createDirectory(this.attributes.destinationFolder, true)];
                     case 6:
-                        _c.sent();
-                        _c.label = 7;
-                    case 7: return [4 /*yield*/, this.upload()];
-                    case 8:
-                        _c.sent();
-                        return [4 /*yield*/, this.close()];
+                        _b.sent();
+                        this.logger.info("Created folder with ".concat(this.attributes.destinationFolder, " on remote server"));
+                        if (!this.attributes.createSymlink) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.createSymlink(this.attributes.destinationFolder, this.attributes.publicDirectory)];
+                    case 7:
+                        _b.sent();
+                        _b.label = 8;
+                    case 8: return [4 /*yield*/, this.upload()];
                     case 9:
-                        _c.sent();
+                        _b.sent();
+                        return [4 /*yield*/, this.closeConnection()];
+                    case 10:
+                        _b.sent();
                         return [2 /*return*/];
                 }
             });
         });
     };
-    ServerClient.prototype.checkNeededDirectoriesExists = function () {
+    ServerClient.prototype.directoryExists = function (path) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var result, dirNames, pubDir, workDir;
+            var result;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.list(this.attributes.workingDirectory))];
+                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.exists(path))];
                     case 1:
                         result = _b.sent();
-                        dirNames = this.getNamesFromList(result);
-                        pubDir = dirNames.find(function (dir) { return dir == "Current"; });
-                        workDir = dirNames.find(function (dir) { return dir == "Versions"; });
-                        if (pubDir === undefined || workDir === undefined) {
-                            this.logger.error("Missing directories ".concat(pubDir, " and ").concat(workDir, " for use with versioning"));
-                            (0, process_1.exit)(1);
-                        }
-                        return [2 /*return*/];
+                        this.logger.info("Checking to see if '".concat(path, "' exists, result was: ").concat(result));
+                        return [2 /*return*/, result !== false];
                 }
             });
         });
     };
-    ServerClient.prototype.generateNewVersionNumber = function () {
+    ServerClient.prototype.createDirectory = function (dirPath, force) {
         var _a;
+        if (force === void 0) { force = false; }
         return __awaiter(this, void 0, void 0, function () {
-            var versionFolders, dirNames, dirNamesAsNumber;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (this.attributes.versionsDirectory === undefined)
-                            return [2 /*return*/, -1];
-                        return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.list(this.attributes.versionsDirectory))];
+                        if (!this.attributes.createFolders && !force) {
+                            this.logger.error("Can't create folder '".concat(dirPath, "' with create folder-attr set to ").concat(this.attributes.createFolders));
+                            (0, process_1.exit)(1);
+                        }
+                        this.logger.info("Creating new directory: '".concat(dirPath));
+                        return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.mkdir(dirPath))];
                     case 1:
-                        versionFolders = _b.sent();
-                        dirNames = this.getNamesFromList(versionFolders);
-                        if (dirNames.length == 0)
+                        _b.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ServerClient.prototype.getVersion = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var versions, versionsAsNumbers;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getExistingVersions()];
+                    case 1:
+                        versions = _a.sent();
+                        if (versions.length == 0) {
+                            this.logger.info("No prior versions found, initiating first version number 1");
                             return [2 /*return*/, 1];
-                        dirNamesAsNumber = [];
-                        dirNames.forEach(function (dirName) {
-                            dirNamesAsNumber.push(parseInt(dirName, 10));
+                        }
+                        versionsAsNumbers = [];
+                        // parse string to ints and push to array
+                        versions.forEach(function (version) {
+                            versionsAsNumbers.push(parseInt(version, 10));
                         });
-                        dirNamesAsNumber.sort(function (a, b) { return a - b; });
-                        return [2 /*return*/, ++dirNamesAsNumber[dirNamesAsNumber.length - 1]];
+                        // sort array in ascending order
+                        versionsAsNumbers.sort(function (a, b) { return a - b; });
+                        return [2 /*return*/, ++versionsAsNumbers[versionsAsNumbers.length - 1]];
+                }
+            });
+        });
+    };
+    ServerClient.prototype.getExistingVersions = function () {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var versions, dirNames;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.list(this.attributes.destinationFolder))];
+                    case 1:
+                        versions = _b.sent();
+                        dirNames = this.getNamesFromList(versions);
+                        return [2 /*return*/, dirNames];
                 }
             });
         });
@@ -159,33 +177,22 @@ var ServerClient = /** @class */ (function () {
         });
         return dirNames;
     };
-    ServerClient.prototype.workingDirectoryExists = function () {
-        var _a;
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.exists(this.attributes.workingDirectory))];
-                    case 1: return [2 /*return*/, _b.sent()];
-                }
-            });
-        });
-    };
     ServerClient.prototype.upload = function () {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var sourceFolder, workingDirectory;
+            var sourceFolder, destinationFolder;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         sourceFolder = this.attributes.sourceFolder;
-                        workingDirectory = this.attributes.workingDirectory;
-                        return [4 /*yield*/, this.cleanDirectory(workingDirectory)];
+                        destinationFolder = this.attributes.destinationFolder;
+                        return [4 /*yield*/, this.cleanDirectory(destinationFolder)];
                     case 1:
                         _b.sent();
-                        return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.uploadDir(sourceFolder, workingDirectory))];
+                        return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.uploadDir(sourceFolder, destinationFolder))];
                     case 2:
                         _b.sent();
-                        this.logger.info("Uploaded source-files to '".concat(workingDirectory, "'"));
+                        this.logger.info("Uploaded source-files to '".concat(destinationFolder, "'"));
                         return [2 /*return*/];
                 }
             });
@@ -205,7 +212,7 @@ var ServerClient = /** @class */ (function () {
             });
         });
     };
-    ServerClient.prototype.close = function () {
+    ServerClient.prototype.closeConnection = function () {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_b) {

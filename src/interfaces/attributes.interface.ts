@@ -1,9 +1,10 @@
 
-export interface IAttributes {
-    workingDirectory: string;
+export interface IAttributes 
+{
     sourceFolder: string;
-    destinationFolder: string | undefined;
+    destinationFolder: string;
     versioning: boolean | undefined;
     publicDirectory: string | undefined;
-    versionsDirectory: string | undefined;
+    createFolders: boolean | undefined;
+    createSymlink: boolean;
 }

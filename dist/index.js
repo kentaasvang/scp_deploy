@@ -60,10 +60,11 @@ function main() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     config = Config.get();
+                    validateConfig(config);
                     client = new serverClient_1.ServerClient(config, logger);
                     action = new Action(client);
                     configLogSafe = __assign(__assign({}, config), { serverConfig: __assign(__assign({}, config.serverConfig), { privateKey: "***" }) });
-                    logger.info("Created ".concat(typeof (client), " with configuration: ").concat(JSON.stringify(configLogSafe)));
+                    logger.info("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
                     return [4 /*yield*/, action.run()];
                 case 1:
                     _a.sent();
@@ -78,6 +79,12 @@ function main() {
             }
         });
     });
+}
+function validateConfig(config) {
+    if (config.attributes.createSymlink && !config.attributes.publicDirectory) {
+        logger.error("Can't create symbolic link when public directory isn't specified.");
+        (0, process_1.exit)(1);
+    }
 }
 var Action = /** @class */ (function () {
     function Action(client) {
@@ -104,13 +111,14 @@ var Config = /** @class */ (function () {
         /*
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
-        const workingDirectory: string = core.getInput("workingDirectory");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
         const versioning: boolean = core.getInput("versioning") == "true";
         const uploadDirectory: string = core.getInput("source_folder");
         const publicDirectory: string = core.getInput("public_directory");
         const versionsDirectory: string = core.getInput("versions_directory");
+        const createFolders: boolean = core.getInput("create_folders");
+        const createSymlink: boolean = core.getInput("create_symlink");
         */
         var host = "headlinev3.no";
         var username = "headline";
@@ -118,10 +126,10 @@ var Config = /** @class */ (function () {
         var privateKey = fs.readFileSync("private_key/id_rsa").toString();
         var versioning = true;
         var sourceFolder = "./dist";
-        var destinationFolder = ".";
-        var workingDirectory = "/home/headline";
-        var publicDirectory = "Current";
-        var versionsDirectory = "Versions";
+        var destinationFolder = "/home/headline/TestFolder";
+        var publicDirectory = "/home/headline/Current";
+        var createFolders = true;
+        var createSymlink = true;
         return {
             serverConfig: {
                 host: host,
@@ -130,12 +138,12 @@ var Config = /** @class */ (function () {
                 privateKey: privateKey
             },
             attributes: {
-                workingDirectory: workingDirectory,
                 sourceFolder: sourceFolder,
                 destinationFolder: destinationFolder,
                 versioning: versioning,
-                publicDirectory: workingDirectory + "/" + publicDirectory,
-                versionsDirectory: workingDirectory + "/" + versionsDirectory
+                publicDirectory: publicDirectory,
+                createFolders: createFolders,
+                createSymlink: createSymlink
             }
         };
     };
