@@ -72,28 +72,16 @@ class Config
 {
     public static get(): IConfiguration 
     {
-        /*
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
         const versioning: boolean = core.getInput("versioning") == "true";
-        const uploadDirectory: string = core.getInput("source_folder");
+        const sourceFolder: string = core.getInput("source_folder");
         const publicDirectory: string = core.getInput("public_directory");
-        const versionsDirectory: string = core.getInput("versions_directory");
+        const destinationFolder: string = core.getInput("destination_folder");
         const createFolders: boolean = core.getInput("create_folders");
         const createSymlink: boolean = core.getInput("create_symlink");
-        */
-        const host: string = "headlinev3.no";
-        const username: string = "headline";
-        const port: number = 22;
-        const privateKey: string = fs.readFileSync("private_key/id_rsa").toString();
-        const versioning: boolean = true;
-        const sourceFolder: string = "./dist";
-        const destinationFolder: string = "/home/headline/TestFolder";
-        const publicDirectory: string = "/home/headline/Current";
-        const createFolders: boolean = true;
-        const createSymlink: boolean = true;
 
         return {
             serverConfig: 

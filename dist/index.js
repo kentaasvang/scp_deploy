@@ -108,28 +108,16 @@ var Config = /** @class */ (function () {
     function Config() {
     }
     Config.get = function () {
-        /*
-        const host: string = core.getInput("host");
-        const username: string = core.getInput("user");
-        const port: number = parseInt(core.getInput("port"));
-        const privateKey: string = core.getInput("private_key");
-        const versioning: boolean = core.getInput("versioning") == "true";
-        const uploadDirectory: string = core.getInput("source_folder");
-        const publicDirectory: string = core.getInput("public_directory");
-        const versionsDirectory: string = core.getInput("versions_directory");
-        const createFolders: boolean = core.getInput("create_folders");
-        const createSymlink: boolean = core.getInput("create_symlink");
-        */
-        var host = "headlinev3.no";
-        var username = "headline";
-        var port = 22;
-        var privateKey = fs.readFileSync("private_key/id_rsa").toString();
-        var versioning = true;
-        var sourceFolder = "./dist";
-        var destinationFolder = "/home/headline/TestFolder";
-        var publicDirectory = "/home/headline/Current";
-        var createFolders = true;
-        var createSymlink = true;
+        var host = core.getInput("host");
+        var username = core.getInput("user");
+        var port = parseInt(core.getInput("port"));
+        var privateKey = core.getInput("private_key");
+        var versioning = core.getInput("versioning") == "true";
+        var sourceFolder = core.getInput("source_folder");
+        var publicDirectory = core.getInput("public_directory");
+        var destinationFolder = core.getInput("destination_folder");
+        var createFolders = core.getInput("create_folders");
+        var createSymlink = core.getInput("create_symlink");
         return {
             serverConfig: {
                 host: host,
