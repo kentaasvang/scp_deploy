@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,18 +49,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var process_1 = require("process");
 var serverClient_1 = require("./serverClient");
-var fs = require("fs");
-var core = require("@actions/core");
+var fs = require("fs"), core = require("@actions/core"), logger = require("pino")({
+    level: "debug"
+});
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var config, client, action, error_1;
+        var config, client, action, configLogSafe, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     config = Config.get();
-                    client = new serverClient_1.ServerClient(config.serverConfig, config.attributes);
+                    validateConfig(config);
+                    client = new serverClient_1.ServerClient(config, logger);
                     action = new Action(client);
+                    configLogSafe = __assign(__assign({}, config), { serverConfig: __assign(__assign({}, config.serverConfig), { privateKey: "***" }) });
+                    logger.info("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
                     return [4 /*yield*/, action.run()];
                 case 1:
                     _a.sent();
@@ -64,6 +79,12 @@ function main() {
             }
         });
     });
+}
+function validateConfig(config) {
+    if (config.attributes.createSymlink && !config.attributes.publicDirectory) {
+        logger.error("Can't create symbolic link when public directory isn't specified.");
+        (0, process_1.exit)(1);
+    }
 }
 var Action = /** @class */ (function () {
     function Action(client) {
@@ -90,19 +111,25 @@ var Config = /** @class */ (function () {
         /*
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
-        const workingDirectory: string = core.getInput("workingDirectory");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
         const versioning: boolean = core.getInput("versioning") == "true";
-        const uploadDirectory: string = core.getInput("upload_directory");
-       */
+        const uploadDirectory: string = core.getInput("source_folder");
+        const publicDirectory: string = core.getInput("public_directory");
+        const versionsDirectory: string = core.getInput("versions_directory");
+        const createFolders: boolean = core.getInput("create_folders");
+        const createSymlink: boolean = core.getInput("create_symlink");
+        */
         var host = "headlinev3.no";
         var username = "headline";
         var port = 22;
-        var workingDirectory = "/home/headline";
-        var privateKey = fs.readFileSync("./private_key/id_rsa").toString();
-        var uploadDirectory = "./dist";
-        var versioning = false;
+        var privateKey = fs.readFileSync("private_key/id_rsa").toString();
+        var versioning = true;
+        var sourceFolder = "./dist";
+        var destinationFolder = "/home/headline/TestFolder";
+        var publicDirectory = "/home/headline/Current";
+        var createFolders = true;
+        var createSymlink = true;
         return {
             serverConfig: {
                 host: host,
@@ -111,9 +138,12 @@ var Config = /** @class */ (function () {
                 privateKey: privateKey
             },
             attributes: {
-                workingDirectory: workingDirectory,
-                uploadDirectory: uploadDirectory,
-                versioning: versioning
+                sourceFolder: sourceFolder,
+                destinationFolder: destinationFolder,
+                versioning: versioning,
+                publicDirectory: publicDirectory,
+                createFolders: createFolders,
+                createSymlink: createSymlink
             }
         };
     };
