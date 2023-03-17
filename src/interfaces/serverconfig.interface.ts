@@ -1,4 +1,3 @@
-
 interface IServerConfig {
     readonly host: string;
     readonly username: string;

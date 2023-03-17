@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
+    "check": "npx tsc --noEmit",
     "build": "npx tsc --build --clean && npx tsc --build",
     "clean": "npx tsc --build --clean",
     "test": "jest"

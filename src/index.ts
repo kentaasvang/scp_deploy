@@ -4,15 +4,12 @@ import { ServerClient } from "./serverClient";
 import { IConfiguration } from "./interfaces/configuration.interface";
 import { ILogger } from "./interfaces/logger.interface";
 
-
 const 
     fs = require("fs"),
     core = require("@actions/core"),
     logger: ILogger = require("pino")({
         level: "debug"
     });
-
-
 
 async function main(): Promise<number> 
 {
@@ -58,7 +55,6 @@ class Action
     }
 }
 
-
 class Config
 {
     public static get(): IConfiguration 
@@ -69,10 +65,6 @@ class Config
         const privateKey: string = core.getInput("private_key");
         const sourceFolder: string = core.getInput("source_folder");
         const destinationFolder: string = core.getInput("destination_folder");
-        const versioning: boolean = core.getInput("versioning") == "true";
-        const publicDirectory: string = core.getInput("public_directory");
-        const createFolders: boolean = core.getInput("create_folders");
-        const createSymlink: boolean = core.getInput("create_symlink");
 
         return {
             serverConfig: 

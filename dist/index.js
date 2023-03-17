@@ -107,10 +107,6 @@ var Config = /** @class */ (function () {
         var privateKey = core.getInput("private_key");
         var sourceFolder = core.getInput("source_folder");
         var destinationFolder = core.getInput("destination_folder");
-        var versioning = core.getInput("versioning") == "true";
-        var publicDirectory = core.getInput("public_directory");
-        var createFolders = core.getInput("create_folders");
-        var createSymlink = core.getInput("create_symlink");
         return {
             serverConfig: {
                 host: host,
