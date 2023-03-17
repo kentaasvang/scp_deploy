@@ -23,22 +23,6 @@ inputs:
   destination_folder:
     description: "Directory to upload files into"
     required: true
-  versioning:
-    description: "publish new deploys in folders with a build number representing it's version. (newer versions get higher build number)"
-    required: false
-    default: false
-  public_directory:
-    description: "Public folder accessable from webclient"
-    required: false
-    default: "Current"
-  create_folders: 
-    description: "Create directories on server if it does not exist"
-    required: false
-    default: false
-  create_symlink:
-    description: "Create a symbolic link from newest version to public directory, required that public directory is set"
-    required: false
-    default: false
 
 runs:
   using: 'node18'
