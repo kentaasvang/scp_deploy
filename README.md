@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Publish Files
-        uses: kentaasvang/scp_deploy@v0.8.2b
+        uses: kentaasvang/scp_deploy@v1.1
         with:
           host: <hostname>
           user: <username>
