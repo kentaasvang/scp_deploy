@@ -13,6 +13,7 @@ const
     });
 
 
+
 async function main(): Promise<number> 
 {
     try 
@@ -76,10 +77,10 @@ class Config
         const username: string = core.getInput("user");
         const port: number = parseInt(core.getInput("port"));
         const privateKey: string = core.getInput("private_key");
-        const versioning: boolean = core.getInput("versioning") == "true";
         const sourceFolder: string = core.getInput("source_folder");
-        const publicDirectory: string = core.getInput("public_directory");
         const destinationFolder: string = core.getInput("destination_folder");
+        const versioning: boolean = core.getInput("versioning") == "true";
+        const publicDirectory: string = core.getInput("public_directory");
         const createFolders: boolean = core.getInput("create_folders");
         const createSymlink: boolean = core.getInput("create_symlink");
 
