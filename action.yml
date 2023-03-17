@@ -1,5 +1,5 @@
 name: "scp deployment"
-description: "Deploy files to remote server over SSH"
+description: "Securely deploy files to remote server over SSH"
 inputs:
 
   host:
@@ -41,5 +41,5 @@ inputs:
     default: false
 
 runs:
-  using: 'node16'
+  using: 'node18'
   main: "dist/index.js"

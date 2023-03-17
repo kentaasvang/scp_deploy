@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServerClient = void 0;
 var node_scp_1 = require("node-scp");
 var process_1 = require("process");
@@ -53,11 +53,11 @@ var ServerClient = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         _a = this;
-                        return [4 /*yield*/, (0, node_scp_1["default"])({
+                        return [4 /*yield*/, (0, node_scp_1.default)({
                                 host: this.serverConfig.host,
                                 port: this.serverConfig.port,
                                 username: this.serverConfig.username,
-                                privateKey: this.serverConfig.privateKey
+                                privateKey: this.serverConfig.privateKey,
                             })];
                     case 1:
                         _a.clientInstance = _b.sent();
