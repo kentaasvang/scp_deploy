@@ -48,43 +48,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var process_1 = require("process");
-var serverClient_1 = require("./serverClient");
-var fs = require("fs"), core = require("@actions/core"), logger = require("pino")({
-    level: "debug"
-});
+var serverClient_1 = require("./clients/serverClient");
+var fs = require("fs"), core = require("@actions/core"), logger = require("pino")({ level: "debug" });
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var config, client, action, configLogSafe, error_1;
+        var settings, client, action, configLogSafe;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    config = Config.get();
-                    validateConfig(config);
-                    client = new serverClient_1.ServerClient(config, logger);
+                    settings = ClientSettings.get();
+                    client = new serverClient_1.ServerClient(settings, logger);
                     action = new Action(client);
-                    configLogSafe = __assign(__assign({}, config), { serverConfig: __assign(__assign({}, config.serverConfig), { privateKey: "***" }) });
-                    logger.info("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
+                    configLogSafe = __assign(__assign({}, settings), { privateKey: "***" });
+                    logger.debug("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
                     return [4 /*yield*/, action.run()];
                 case 1:
                     _a.sent();
                     (0, process_1.exit)(0);
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_1 = _a.sent();
-                    core.setFailed(error_1.message);
-                    (0, process_1.exit)(1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
-}
-function validateConfig(config) {
-    if (config.attributes.createSymlink && !config.attributes.publicDirectory) {
-        logger.error("Can't create symbolic link when public directory isn't specified.");
-        (0, process_1.exit)(1);
-    }
 }
 var Action = /** @class */ (function () {
     function Action(client) {
@@ -104,37 +88,25 @@ var Action = /** @class */ (function () {
     };
     return Action;
 }());
-var Config = /** @class */ (function () {
-    function Config() {
+var ClientSettings = /** @class */ (function () {
+    function ClientSettings() {
     }
-    Config.get = function () {
+    ClientSettings.get = function () {
         var host = core.getInput("host");
         var username = core.getInput("user");
         var port = parseInt(core.getInput("port"));
         var privateKey = core.getInput("private_key");
         var sourceFolder = core.getInput("source_folder");
         var destinationFolder = core.getInput("destination_folder");
-        var versioning = core.getInput("versioning") == "true";
-        var publicDirectory = core.getInput("public_directory");
-        var createFolders = core.getInput("create_folders");
-        var createSymlink = core.getInput("create_symlink");
         return {
-            serverConfig: {
-                host: host,
-                username: username,
-                port: port,
-                privateKey: privateKey
-            },
-            attributes: {
-                sourceFolder: sourceFolder,
-                destinationFolder: destinationFolder,
-                versioning: versioning,
-                publicDirectory: publicDirectory,
-                createFolders: createFolders,
-                createSymlink: createSymlink
-            }
+            host: host,
+            username: username,
+            port: port,
+            privateKey: privateKey,
+            sourceFolder: sourceFolder,
+            destinationFolder: destinationFolder,
         };
     };
-    return Config;
+    return ClientSettings;
 }());
 main();

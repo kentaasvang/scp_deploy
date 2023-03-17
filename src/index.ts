@@ -1,56 +1,30 @@
 import { exit } from "process";
-import { IServerClient } from "./interfaces/serverClient.interface";
-import { ServerClient } from "./serverClient";
-import { IConfiguration } from "./interfaces/configuration.interface";
-import { ILogger } from "./interfaces/logger.interface";
-
+import { IServerClient, ServerClient } from "./clients/serverClient";
+import { ILogger } from "./logger/logger";
+import { IClientSettings } from "./settings/clientSettings";
 
 const 
     fs = require("fs"),
     core = require("@actions/core"),
-    logger: ILogger = require("pino")({
-        level: "debug"
-    });
-
-
+    logger: ILogger = require("pino")({ level: "debug" }
+    );
 
 async function main(): Promise<number> 
 {
-    try 
-    {
-        let config: IConfiguration = Config.get();
-        validateConfig(config);
-        let client: IServerClient = new ServerClient(config, logger);
-        let action: Action = new Action(client);
+    let settings: IClientSettings = ClientSettings.get();
+    let client: IServerClient = new ServerClient(settings, logger);
+    let action: Action = new Action(client);
 
-        const configLogSafe = 
-        { 
-            ...config, 
-            serverConfig: 
-            {
-                ...config.serverConfig,
-                privateKey: "***"
-            }
-        };
-        logger.info(`Created client w/ config: ${JSON.stringify(configLogSafe)}`);
+    const configLogSafe = 
+    { 
+        ...settings, 
+        privateKey: "***"
+    };
 
-        await action.run()
-        exit(0);
-    } 
-    catch (error: any) 
-    {
-        core.setFailed(error.message); 
-        exit(1);
-    }
-}
+    logger.debug(`Created client w/ config: ${JSON.stringify(configLogSafe)}`);
 
-function validateConfig(config: IConfiguration) 
-{
-    if (config.attributes.createSymlink && !config.attributes.publicDirectory)
-    {
-        logger.error(`Can't create symbolic link when public directory isn't specified.`);
-        exit(1);
-    }
+    await action.run()
+    exit(0);
 }
 
 class Action 
@@ -68,10 +42,9 @@ class Action
     }
 }
 
-
-class Config
+class ClientSettings
 {
-    public static get(): IConfiguration 
+    public static get(): IClientSettings 
     {
         const host: string = core.getInput("host");
         const username: string = core.getInput("user");
@@ -79,28 +52,14 @@ class Config
         const privateKey: string = core.getInput("private_key");
         const sourceFolder: string = core.getInput("source_folder");
         const destinationFolder: string = core.getInput("destination_folder");
-        const versioning: boolean = core.getInput("versioning") == "true";
-        const publicDirectory: string = core.getInput("public_directory");
-        const createFolders: boolean = core.getInput("create_folders");
-        const createSymlink: boolean = core.getInput("create_symlink");
 
         return {
-            serverConfig: 
-            {
-                host: host,
-                username: username,
-                port: port,
-                privateKey: privateKey
-            },
-            attributes: 
-            {
-                sourceFolder: sourceFolder,
-                destinationFolder: destinationFolder,
-                versioning: versioning,
-                publicDirectory: publicDirectory,
-                createFolders: createFolders,
-                createSymlink: createSymlink
-            }
+            host: host,
+            username: username,
+            port: port,
+            privateKey: privateKey,
+            sourceFolder: sourceFolder,
+            destinationFolder: destinationFolder,
         }
     }
 }
