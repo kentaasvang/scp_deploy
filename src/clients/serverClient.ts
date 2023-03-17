@@ -1,14 +1,12 @@
-import { countReset } from "console";
 import Client, { ScpClient } from "node-scp";
-import { exit, versions } from "process";
+import { ILogger } from "../logger/logger";
 import { IClientSettings } from "../settings/clientSettings";
-import { ILogger } from "../logger/logger.interface";
 
 let SSH = require("simple-ssh");
 
 export interface IServerClient 
 {
-    readonly config: IClientSettings;
+    readonly settings: IClientSettings;
     readonly logger: ILogger;
     readonly clientInstance: ScpClient | undefined;
 
@@ -17,15 +15,15 @@ export interface IServerClient
 
 export class ServerClient implements IServerClient 
 {
-    readonly config: IClientSettings;
+    readonly settings: IClientSettings;
     readonly client: Promise<ScpClient> | undefined;
     readonly logger: ILogger;
 
     clientInstance: ScpClient | undefined;
 
-    constructor(config: IClientSettings, logger: ILogger) 
+    constructor(settings: IClientSettings, logger: ILogger) 
     {
-        this.config = config;
+        this.settings = settings;
         this.logger = logger;
     }
 
@@ -33,36 +31,43 @@ export class ServerClient implements IServerClient
     {
         this.clientInstance = await Client(
         {
-            host: this.config.host,
-            port: this.config.port,
-            username: this.config.username,
-            privateKey: this.config.privateKey,
+            host: this.settings.host,
+            port: this.settings.port,
+            username: this.settings.username,
+            privateKey: this.settings.privateKey,
         });
-
-        await this.upload();
-        await this.closeConnection();
+        
+        let sourceDirExists = await this.directoryExists(this.settings.destinationFolder);
+        if (sourceDirExists)
+            await this.upload();
+            
+        this.closeConnection();
     }
     
     private async directoryExists(path: string): Promise<boolean> 
     {
-        let result = await this.clientInstance?.exists(path);
-        this.logger.info(`Checking to see if '${path}' exists, result was: ${result}`);
-        return result !== false;
+        this.logger.info(`Checking to see if '${path}' exists`);
+        let exists = await this.clientInstance?.exists(path);
+        let result = exists !== false;
+        this.logger.info(`Path exists: ${result}`);
+        return result;
     }
 
     private async upload(): Promise<void> 
     {
-        let sourceFolder: string = this.config.sourceFolder;
-        let destinationFolder: string = this.config.destinationFolder;
+        this.logger.info("Uploading files..");
+        let sourceFolder: string = this.settings.sourceFolder;
+        let destinationFolder: string = this.settings.destinationFolder;
 
         await this.clientInstance?.uploadDir(sourceFolder, destinationFolder);
-        this.logger.info(`Uploaded source-files to '${destinationFolder}'`);
+        this.logger.info(`Files successfully uploaded to '${destinationFolder}'`);
     }
 
-    private async closeConnection(): Promise<void | undefined> 
+    private closeConnection(): void
     {
         this.logger.info("Closing connection to server..");
-        return await this.clientInstance?.close();
+        this.clientInstance?.close();
+        this.logger.info("Connection to server is closed.");
     }
 }
 

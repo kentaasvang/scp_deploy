@@ -1,5 +1,3 @@
-
-
 export interface ILogger
 {
     debug(msg: string): void;

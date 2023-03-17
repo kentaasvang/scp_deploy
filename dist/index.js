@@ -49,32 +49,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var process_1 = require("process");
 var serverClient_1 = require("./clients/serverClient");
-var fs = require("fs"), core = require("@actions/core"), logger = require("pino")({
-    level: "debug"
-});
+var fs = require("fs"), core = require("@actions/core"), logger = require("pino")({ level: "debug" });
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var config, client, action, configLogSafe, error_1;
+        var settings, client, action, configLogSafe;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    config = ClientSettings.get();
-                    client = new serverClient_1.ServerClient(config, logger);
+                    settings = ClientSettings.get();
+                    client = new serverClient_1.ServerClient(settings, logger);
                     action = new Action(client);
-                    configLogSafe = __assign(__assign({}, config), { privateKey: "***" });
-                    logger.info("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
+                    configLogSafe = __assign(__assign({}, settings), { privateKey: "***" });
+                    logger.debug("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
                     return [4 /*yield*/, action.run()];
                 case 1:
                     _a.sent();
                     (0, process_1.exit)(0);
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_1 = _a.sent();
-                    core.setFailed(error_1.message);
-                    (0, process_1.exit)(1);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
@@ -111,7 +102,7 @@ var ClientSettings = /** @class */ (function () {
         var host = "lagdincv.no";
         var username = "kent";
         var port = 22;
-        var privateKey = fs.readFileSync("./private_key/id_rsa", "utf-8");
+        var privateKey = fs.readFileSync("./private/id_rsa", "utf-8");
         var sourceFolder = "./dist";
         var destinationFolder = "/home/kent/scp_deploy_test";
         return {

@@ -40,31 +40,35 @@ exports.ServerClient = void 0;
 var node_scp_1 = require("node-scp");
 var SSH = require("simple-ssh");
 var ServerClient = /** @class */ (function () {
-    function ServerClient(config, logger) {
-        this.config = config;
+    function ServerClient(settings, logger) {
+        this.settings = settings;
         this.logger = logger;
     }
     ServerClient.prototype.deploy = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
+            var _a, sourceDirExists;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = this;
                         return [4 /*yield*/, (0, node_scp_1.default)({
-                                host: this.config.host,
-                                port: this.config.port,
-                                username: this.config.username,
-                                privateKey: this.config.privateKey,
+                                host: this.settings.host,
+                                port: this.settings.port,
+                                username: this.settings.username,
+                                privateKey: this.settings.privateKey,
                             })];
                     case 1:
                         _a.clientInstance = _b.sent();
-                        return [4 /*yield*/, this.upload()];
+                        return [4 /*yield*/, this.directoryExists(this.settings.destinationFolder)];
                     case 2:
-                        _b.sent();
-                        return [4 /*yield*/, this.closeConnection()];
+                        sourceDirExists = _b.sent();
+                        if (!sourceDirExists) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.upload()];
                     case 3:
                         _b.sent();
+                        _b.label = 4;
+                    case 4:
+                        this.closeConnection();
                         return [2 /*return*/];
                 }
             });
@@ -73,14 +77,17 @@ var ServerClient = /** @class */ (function () {
     ServerClient.prototype.directoryExists = function (path) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var exists, result;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.exists(path))];
+                    case 0:
+                        this.logger.info("Checking to see if '".concat(path, "' exists"));
+                        return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.exists(path))];
                     case 1:
-                        result = _b.sent();
-                        this.logger.info("Checking to see if '".concat(path, "' exists, result was: ").concat(result));
-                        return [2 /*return*/, result !== false];
+                        exists = _b.sent();
+                        result = exists !== false;
+                        this.logger.info("Path exists: ".concat(result));
+                        return [2 /*return*/, result];
                 }
             });
         });
@@ -92,12 +99,13 @@ var ServerClient = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        sourceFolder = this.config.sourceFolder;
-                        destinationFolder = this.config.destinationFolder;
+                        this.logger.info("Uploading files..");
+                        sourceFolder = this.settings.sourceFolder;
+                        destinationFolder = this.settings.destinationFolder;
                         return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.uploadDir(sourceFolder, destinationFolder))];
                     case 1:
                         _b.sent();
-                        this.logger.info("Uploaded source-files to '".concat(destinationFolder, "'"));
+                        this.logger.info("Files successfully uploaded to '".concat(destinationFolder, "'"));
                         return [2 /*return*/];
                 }
             });
@@ -105,16 +113,9 @@ var ServerClient = /** @class */ (function () {
     };
     ServerClient.prototype.closeConnection = function () {
         var _a;
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        this.logger.info("Closing connection to server..");
-                        return [4 /*yield*/, ((_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.close())];
-                    case 1: return [2 /*return*/, _b.sent()];
-                }
-            });
-        });
+        this.logger.info("Closing connection to server..");
+        (_a = this.clientInstance) === null || _a === void 0 ? void 0 : _a.close();
+        this.logger.info("Connection to server is closed.");
     };
     return ServerClient;
 }());
