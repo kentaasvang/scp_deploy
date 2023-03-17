@@ -92,19 +92,12 @@ var ClientSettings = /** @class */ (function () {
     function ClientSettings() {
     }
     ClientSettings.get = function () {
-        // const host: string = core.getInput("host");
-        // const username: string = core.getInput("user");
-        // const port: number = parseInt(core.getInput("port"));
-        // const privateKey: string = core.getInput("private_key");
-        // const sourceFolder: string = core.getInput("source_folder");
-        // const destinationFolder: string = core.getInput("destination_folder");
-        // for testing
-        var host = "lagdincv.no";
-        var username = "kent";
-        var port = 22;
-        var privateKey = fs.readFileSync("./private/id_rsa", "utf-8");
-        var sourceFolder = "./dist";
-        var destinationFolder = "/home/kent/scp_deploy_test";
+        var host = core.getInput("host");
+        var username = core.getInput("user");
+        var port = parseInt(core.getInput("port"));
+        var privateKey = core.getInput("private_key");
+        var sourceFolder = core.getInput("source_folder");
+        var destinationFolder = core.getInput("destination_folder");
         return {
             host: host,
             username: username,
