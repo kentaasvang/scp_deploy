@@ -19,7 +19,6 @@ async function main(): Promise<number>
     try 
     {
         let config: IConfiguration = Config.get();
-        validateConfig(config);
         let client: IServerClient = new ServerClient(config, logger);
         let action: Action = new Action(client);
 
@@ -40,15 +39,6 @@ async function main(): Promise<number>
     catch (error: any) 
     {
         core.setFailed(error.message); 
-        exit(1);
-    }
-}
-
-function validateConfig(config: IConfiguration) 
-{
-    if (config.attributes.createSymlink && !config.attributes.publicDirectory)
-    {
-        logger.error(`Can't create symbolic link when public directory isn't specified.`);
         exit(1);
     }
 }
@@ -96,10 +86,6 @@ class Config
             {
                 sourceFolder: sourceFolder,
                 destinationFolder: destinationFolder,
-                versioning: versioning,
-                publicDirectory: publicDirectory,
-                createFolders: createFolders,
-                createSymlink: createSymlink
             }
         }
     }

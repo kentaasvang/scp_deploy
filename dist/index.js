@@ -60,7 +60,6 @@ function main() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     config = Config.get();
-                    validateConfig(config);
                     client = new serverClient_1.ServerClient(config, logger);
                     action = new Action(client);
                     configLogSafe = __assign(__assign({}, config), { serverConfig: __assign(__assign({}, config.serverConfig), { privateKey: "***" }) });
@@ -79,12 +78,6 @@ function main() {
             }
         });
     });
-}
-function validateConfig(config) {
-    if (config.attributes.createSymlink && !config.attributes.publicDirectory) {
-        logger.error("Can't create symbolic link when public directory isn't specified.");
-        (0, process_1.exit)(1);
-    }
 }
 var Action = /** @class */ (function () {
     function Action(client) {
@@ -128,10 +121,6 @@ var Config = /** @class */ (function () {
             attributes: {
                 sourceFolder: sourceFolder,
                 destinationFolder: destinationFolder,
-                versioning: versioning,
-                publicDirectory: publicDirectory,
-                createFolders: createFolders,
-                createSymlink: createSymlink
             }
         };
     };
