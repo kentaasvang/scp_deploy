@@ -1,27 +1,31 @@
 import { countReset } from "console";
 import Client, { ScpClient } from "node-scp";
 import { exit, versions } from "process";
-import { IAttributes } from "./interfaces/attributes.interface";
-import { IConfiguration } from "./interfaces/configuration.interface";
-import { ILogger } from "./interfaces/logger.interface";
-import { IServerClient } from "./interfaces/serverClient.interface";
+import { IClientSettings } from "../settings/clientSettings";
+import { ILogger } from "../logger/logger.interface";
 
 let SSH = require("simple-ssh");
 
+export interface IServerClient 
+{
+    readonly config: IClientSettings;
+    readonly logger: ILogger;
+    readonly clientInstance: ScpClient | undefined;
+
+    deploy(): Promise<void>;
+}
 
 export class ServerClient implements IServerClient 
 {
-    readonly serverConfig: IServerConfig;
-    readonly attributes: IAttributes;
+    readonly config: IClientSettings;
     readonly client: Promise<ScpClient> | undefined;
     readonly logger: ILogger;
 
     clientInstance: ScpClient | undefined;
 
-    constructor(config: IConfiguration, logger: ILogger) 
+    constructor(config: IClientSettings, logger: ILogger) 
     {
-        this.serverConfig = config.serverConfig;
-        this.attributes = config.attributes;
+        this.config = config;
         this.logger = logger;
     }
 
@@ -29,10 +33,10 @@ export class ServerClient implements IServerClient
     {
         this.clientInstance = await Client(
         {
-            host: this.serverConfig.host,
-            port: this.serverConfig.port,
-            username: this.serverConfig.username,
-            privateKey: this.serverConfig.privateKey,
+            host: this.config.host,
+            port: this.config.port,
+            username: this.config.username,
+            privateKey: this.config.privateKey,
         });
 
         await this.upload();
@@ -48,8 +52,8 @@ export class ServerClient implements IServerClient
 
     private async upload(): Promise<void> 
     {
-        let sourceFolder: string = this.attributes.sourceFolder;
-        let destinationFolder: string = this.attributes.destinationFolder;
+        let sourceFolder: string = this.config.sourceFolder;
+        let destinationFolder: string = this.config.destinationFolder;
 
         await this.clientInstance?.uploadDir(sourceFolder, destinationFolder);
         this.logger.info(`Uploaded source-files to '${destinationFolder}'`);

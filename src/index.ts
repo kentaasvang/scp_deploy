@@ -1,8 +1,7 @@
 import { exit } from "process";
-import { IServerClient } from "./interfaces/serverClient.interface";
-import { ServerClient } from "./serverClient";
-import { IConfiguration } from "./interfaces/configuration.interface";
-import { ILogger } from "./interfaces/logger.interface";
+import { IServerClient, ServerClient } from "./clients/serverClient";
+import { ILogger } from "./logger/logger.interface";
+import { IClientSettings } from "./settings/clientSettings";
 
 const 
     fs = require("fs"),
@@ -15,19 +14,16 @@ async function main(): Promise<number>
 {
     try 
     {
-        let config: IConfiguration = Config.get();
+        let config: IClientSettings = ClientSettings.get();
         let client: IServerClient = new ServerClient(config, logger);
         let action: Action = new Action(client);
 
         const configLogSafe = 
         { 
             ...config, 
-            serverConfig: 
-            {
-                ...config.serverConfig,
-                privateKey: "***"
-            }
+            privateKey: "***"
         };
+
         logger.info(`Created client w/ config: ${JSON.stringify(configLogSafe)}`);
 
         await action.run()
@@ -55,30 +51,32 @@ class Action
     }
 }
 
-class Config
+class ClientSettings
 {
-    public static get(): IConfiguration 
+    public static get(): IClientSettings 
     {
-        const host: string = core.getInput("host");
-        const username: string = core.getInput("user");
-        const port: number = parseInt(core.getInput("port"));
-        const privateKey: string = core.getInput("private_key");
-        const sourceFolder: string = core.getInput("source_folder");
-        const destinationFolder: string = core.getInput("destination_folder");
+        // const host: string = core.getInput("host");
+        // const username: string = core.getInput("user");
+        // const port: number = parseInt(core.getInput("port"));
+        // const privateKey: string = core.getInput("private_key");
+        // const sourceFolder: string = core.getInput("source_folder");
+        // const destinationFolder: string = core.getInput("destination_folder");
+
+        // for testing
+        const host: string = "lagdincv.no";
+        const username: string = "kent";
+        const port: number = 22; 
+        const privateKey: string = fs.readFileSync("./private_key/id_rsa", "utf-8");
+        const sourceFolder: string = "./dist";
+        const destinationFolder: string = "/home/kent/scp_deploy_test" 
 
         return {
-            serverConfig: 
-            {
-                host: host,
-                username: username,
-                port: port,
-                privateKey: privateKey
-            },
-            attributes: 
-            {
-                sourceFolder: sourceFolder,
-                destinationFolder: destinationFolder,
-            }
+            host: host,
+            username: username,
+            port: port,
+            privateKey: privateKey,
+            sourceFolder: sourceFolder,
+            destinationFolder: destinationFolder,
         }
     }
 }

@@ -48,7 +48,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var process_1 = require("process");
-var serverClient_1 = require("./serverClient");
+var serverClient_1 = require("./clients/serverClient");
 var fs = require("fs"), core = require("@actions/core"), logger = require("pino")({
     level: "debug"
 });
@@ -59,10 +59,10 @@ function main() {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    config = Config.get();
+                    config = ClientSettings.get();
                     client = new serverClient_1.ServerClient(config, logger);
                     action = new Action(client);
-                    configLogSafe = __assign(__assign({}, config), { serverConfig: __assign(__assign({}, config.serverConfig), { privateKey: "***" }) });
+                    configLogSafe = __assign(__assign({}, config), { privateKey: "***" });
                     logger.info("Created client w/ config: ".concat(JSON.stringify(configLogSafe)));
                     return [4 /*yield*/, action.run()];
                 case 1:
@@ -97,29 +97,32 @@ var Action = /** @class */ (function () {
     };
     return Action;
 }());
-var Config = /** @class */ (function () {
-    function Config() {
+var ClientSettings = /** @class */ (function () {
+    function ClientSettings() {
     }
-    Config.get = function () {
-        var host = core.getInput("host");
-        var username = core.getInput("user");
-        var port = parseInt(core.getInput("port"));
-        var privateKey = core.getInput("private_key");
-        var sourceFolder = core.getInput("source_folder");
-        var destinationFolder = core.getInput("destination_folder");
+    ClientSettings.get = function () {
+        // const host: string = core.getInput("host");
+        // const username: string = core.getInput("user");
+        // const port: number = parseInt(core.getInput("port"));
+        // const privateKey: string = core.getInput("private_key");
+        // const sourceFolder: string = core.getInput("source_folder");
+        // const destinationFolder: string = core.getInput("destination_folder");
+        // for testing
+        var host = "lagdincv.no";
+        var username = "kent";
+        var port = 22;
+        var privateKey = fs.readFileSync("./private_key/id_rsa", "utf-8");
+        var sourceFolder = "./dist";
+        var destinationFolder = "/home/kent/scp_deploy_test";
         return {
-            serverConfig: {
-                host: host,
-                username: username,
-                port: port,
-                privateKey: privateKey
-            },
-            attributes: {
-                sourceFolder: sourceFolder,
-                destinationFolder: destinationFolder,
-            }
+            host: host,
+            username: username,
+            port: port,
+            privateKey: privateKey,
+            sourceFolder: sourceFolder,
+            destinationFolder: destinationFolder,
         };
     };
-    return Config;
+    return ClientSettings;
 }());
 main();
