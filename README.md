@@ -3,15 +3,14 @@
 ## What it is:
 
 scp_deploy is a [Github-action](https://docs.github.com/en/actions) that handles publishing code to a remote server.
-You can publish files to a specified folder with the option to use versioning and retain older versions of your builds on the remote server for fast access. 
-scp_deploy also supports creating symlinks when publishing new versions which i.e can be used to update the content of your web server.
 
 ## How to use:
 
 ### prerequisites
 
 1. Remote server set up with OpenSSH access, encrypted keys, _not_ password
-2. You must provide you private key, preferably through github secrets
+2. You must provide you private key, preferably through github secrets.
+3. destination\_folder specified must exist on remote server as scp\_deploy does not support creating directories.
 
 ### Publish files to a remote folder
 
@@ -42,11 +41,9 @@ jobs:
         with:
           host: <hostname>
           user: <username>
-          # private_key if set up in github secrets
           private_key: ${{ secrets.<your_secret_key_name> }}
           source_folder: <name-of-folder-in-repo-to-publish>
           destination_folder: <absolute-path-on-server>
-          create_folders: false
 ```
 
 ---
@@ -75,19 +72,4 @@ destination_folder:
     description: "Directory to upload files into"
     required: true
     versioning:
-description: "publish new deploys in folders with a build number representing it's version. (newer versions get higher build number)"
-    required: false
-    default: false
-public_directory:
-    description: "Public folder accessable from webclient"
-    required: false
-    default: "Current"
-create_folders: 
-    description: "Create directories on server if it does not exist"
-    required: false
-    default: false
-create_symlink:
-    description: "Create a symbolic link from newest version to public directory, required that public directory is set"
-    required: false
-    default: false
 ```
