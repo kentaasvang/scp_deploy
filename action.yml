@@ -1,29 +1,24 @@
-name: "scp deployment"
-description: "Securely deploy files to remote server over SSH"
+name: 'scp_eploy'
+description: 'Deploy code to a remote server using SCP'
 inputs:
-
   host:
-    description: "The IP or domain-name of your server"
+    description: 'The IP or domain-name of your server'
     required: true
-  user: 
-    description: "The username to connect with"
+  user:
+    description: 'The username to connect with'
     required: true
-  port: 
-    description: "Port to use with your connection"
-    required: false
-    default: 22
+  port:
+    description: 'Port to use with your connection'
+    default: '22'
   private_key:
-    description: "Your private key as string"
+    description: 'Your private key as string'
     required: true
-    default: ""
-
   source_folder:
-    description: "Directory to upload"
+    description: 'Directory to upload'
     required: true
   destination_folder:
-    description: "Directory to upload files into"
+    description: 'Directory to upload files into'
     required: true
-
 runs:
-  using: 'node16'
-  main: "dist/index.js"
+  using: 'node20'
+  main: 'dist/index.js'
