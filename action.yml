@@ -20,5 +20,5 @@ inputs:
     description: 'Directory to upload files into'
     required: true
 runs:
-  using: 'node20'
+  using: 'node16'
   main: 'dist/index.js'
