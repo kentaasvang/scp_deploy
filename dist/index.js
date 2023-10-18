@@ -35,39 +35,45 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-// scp_deploy.ts
+var fs = require("fs");
 var core = require("@actions/core");
 var exec = require("@actions/exec");
-var fs = require("fs");
+var Client = require('node-scp').Client;
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var host, user, port, privateKey, sourceFolder, destinationFolder, keyPath, scpCommand, error_1;
+        var host, user, port, privateKey, sourceFolder, destinationFolder, client, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 3, , 4]);
                     host = core.getInput('host', { required: true });
                     user = core.getInput('user', { required: true });
                     port = core.getInput('port') || '22';
                     privateKey = core.getInput('private_key', { required: true });
                     sourceFolder = core.getInput('source_folder', { required: true });
                     destinationFolder = core.getInput('destination_folder', { required: true });
-                    keyPath = '/tmp/deploy_key';
-                    fs.writeFileSync(keyPath, privateKey);
-                    fs.chmodSync(keyPath, '600'); // Set required permissions
-                    scpCommand = "scp -i ".concat(keyPath, " -P ").concat(port, " -r ").concat(sourceFolder, " ").concat(user, "@").concat(host, ":").concat(destinationFolder);
-                    // Execute SCP
-                    return [4 /*yield*/, exec.exec(scpCommand)];
+                    return [4 /*yield*/, Client({
+                            host: host,
+                            port: port,
+                            username: user,
+                            privateKey: privateKey
+                        })];
                 case 1:
-                    // Execute SCP
-                    _a.sent();
-                    return [3 /*break*/, 3];
+                    client = _a.sent();
+                    // Upload files
+                    return [4 /*yield*/, client.uploadDir(sourceFolder, destinationFolder)];
                 case 2:
+                    // Upload files
+                    _a.sent();
+                    // Close the SCP connection
+                    client.close();
+                    core.info('Files uploaded successfully!');
+                    return [3 /*break*/, 4];
+                case 3:
                     error_1 = _a.sent();
                     core.setFailed(error_1.message);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     });

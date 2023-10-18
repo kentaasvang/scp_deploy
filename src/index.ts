@@ -1,7 +1,7 @@
 const fs = require("fs");
 const core = require("@actions/core");
 const exec = require("@actions/exec");
-const scp = require("node-scp");
+const { Client } = require('node-scp')
 
 async function run() {
     try {
@@ -14,7 +14,7 @@ async function run() {
         const destinationFolder: string = core.getInput('destination_folder', { required: true });
 
         // SCP Client configuration
-        const client = await scp({
+        const client = await Client({
             host: host,
             port: port,
             username: user,
