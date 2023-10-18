@@ -1,75 +1,58 @@
-# SCP deploy
+# SCP Deploy GitHub Action
 
-## What it is:
+This action allows you to securely transfer files from your GitHub repository to a remote server using the Secure Copy Protocol (SCP).
 
-scp_deploy is a [Github-action](https://docs.github.com/en/actions) that handles publishing code to a remote server.
+## Prerequisites
 
-## How to use:
+    A remote server with OpenSSH access set up.
+    Encrypted key authentication set up on the server (passwords are not supported).
+    Ensure the destination folder on the server exists.
 
-### prerequisites
+## Usage
 
-1. Remote server set up with OpenSSH access, encrypted keys, _not_ password
-2. You must provide you private key, preferably through github secrets.
-3. destination\_folder specified must exist on remote server as scp\_deploy does not support creating directories.
+### Inputs
 
-### Publish files to a remote folder
+| Name               | Description                               | Required | Default |
+|--------------------|-------------------------------------------|----------|---------|
+| `host`             | IP or domain-name of your server.         | Yes      | -       |
+| `user`             | Username to connect with.                 | Yes      | -       |
+| `port`             | Port for SSH.                             | No       | `22`    |
+| `private_key`      | Your SSH private key as a string.         | Yes      | -       |
+| `source_folder`    | Directory in your repo to upload.         | Yes      | -       |
+| `destination_folder` | Directory on the server to upload files into. | Yes  | -       |
 
-Create `deploy.yml` in your repo at `.github/workflows/`. This will publish files in _source_folder_ to _destination\_folder_ on remote server. 
 
-Note that with this setup the **destination_folder** must be created before hand. To allow scp_deploy to create files on remote server set **create_folders: true**
+### Example Workflow
 
 ```yaml
+
 name: Deploy to Remote Server
 
-# Controls when the workflow will run
 on:
   push:
-    branches: [ "master" ]
-  
-  workflow_dispatch:
+    branches: [ "main" ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  
   deploy:
     runs-on: ubuntu-latest
-    name: Deploys To Server
-
     steps:
-      - name: Publish Files
-        uses: kentaasvang/scp_deploy@v1.1
-        with:
-          host: <hostname>
-          user: <username>
-          private_key: ${{ secrets.<your_secret_key_name> }}
-          source_folder: <name-of-folder-in-repo-to-publish>
-          destination_folder: <absolute-path-on-server>
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: SCP Deploy
+      uses: kentaasvang/scp_deploy@v2.0.0b
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        user: ${{ secrets.REMOTE_USER }}
+        private_key: ${{ secrets.REMOTE_SSH_PRIVATE_KEY }}
+        source_folder: './path/in/repo'
+        destination_folder: '/path/on/server'
 ```
 
----
-## Full API
+## Security
 
-```yaml
-host:
-    description: "The IP or domain-name of your server"
-    required: true
-user: 
-    description: "The username to connect with"
-    required: true
-port: 
-    description: "Port to use with your connection"
-    required: false
-    default: 22
-private_key:
-    description: "Your private key as string"
-    required: true
-    default: ""
+Always store sensitive information such as your SSH private keys as GitHub secrets. This action is implemented with security in mind, but always ensure you understand the underlying code and implications before using any GitHub Action.
 
-source_folder:
-    description: "Directory to upload"
-    required: true
-destination_folder:
-    description: "Directory to upload files into"
-    required: true
-    versioning:
-```
+## License
+
+MIT
