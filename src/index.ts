@@ -1,68 +1,32 @@
-import { exit } from "process";
-import { IServerClient, ServerClient } from "./clients/serverClient";
-import { ILogger } from "./logger/logger";
-import { IClientSettings } from "./settings/clientSettings";
+// scp_deploy.ts
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as fs from 'fs';
 
-const 
-    fs = require("fs"),
-    core = require("@actions/core"),
-    logger: ILogger = require("pino")({ level: "debug" }
-    );
+async function run() {
+    try {
+        // Gather inputs from users or default values
+        const host: string = core.getInput('host', { required: true });
+        const user: string = core.getInput('user', { required: true });
+        const port: string = core.getInput('port') || '22';
+        const privateKey: string = core.getInput('private_key', { required: true });
+        const sourceFolder: string = core.getInput('source_folder', { required: true });
+        const destinationFolder: string = core.getInput('destination_folder', { required: true });
 
-async function main(): Promise<number> 
-{
-    let settings: IClientSettings = ClientSettings.get();
-    let client: IServerClient = new ServerClient(settings, logger);
-    let action: Action = new Action(client);
+        // Write private key to a temporary file for SCP
+        const keyPath: string = '/tmp/deploy_key';
+        fs.writeFileSync(keyPath, privateKey);
+        fs.chmodSync(keyPath, '600'); // Set required permissions
 
-    const configLogSafe = 
-    { 
-        ...settings, 
-        privateKey: "***"
-    };
+        // SCP Command
+        const scpCommand: string = `scp -i ${keyPath} -P ${port} -r ${sourceFolder} ${user}@${host}:${destinationFolder}`;
+        
+        // Execute SCP
+        await exec.exec(scpCommand);
 
-    logger.debug(`Created client w/ config: ${JSON.stringify(configLogSafe)}`);
-
-    await action.run()
-    exit(0);
-}
-
-class Action 
-{
-    client: IServerClient;
-
-    public constructor(client: IServerClient) 
-    {
-        this.client = client;
-    }
-
-    public async run(): Promise<void> 
-    {
-        await this.client.deploy();
+    } catch (error: any) {
+        core.setFailed(error.message);
     }
 }
 
-class ClientSettings
-{
-    public static get(): IClientSettings 
-    {
-        const host: string = core.getInput("host");
-        const username: string = core.getInput("user");
-        const port: number = parseInt(core.getInput("port"));
-        const privateKey: string = core.getInput("private_key");
-        const sourceFolder: string = core.getInput("source_folder");
-        const destinationFolder: string = core.getInput("destination_folder");
-
-        return {
-            host: host,
-            username: username,
-            port: port,
-            privateKey: privateKey,
-            sourceFolder: sourceFolder,
-            destinationFolder: destinationFolder,
-        }
-    }
-}
-
-main();
-
+run();
