@@ -1,6 +1,7 @@
 const fs = require("fs");
 const core = require("@actions/core");
 const exec = require("@actions/exec");
+const { Client } = require('node-scp')
 
 async function run() {
     try {
@@ -12,16 +13,21 @@ async function run() {
         const sourceFolder: string = core.getInput('source_folder', { required: true });
         const destinationFolder: string = core.getInput('destination_folder', { required: true });
 
-        // Write private key to a temporary file for SCP
-        const keyPath: string = '/tmp/deploy_key';
-        fs.writeFileSync(keyPath, privateKey);
-        fs.chmodSync(keyPath, '600'); // Set required permissions
+        // SCP Client configuration
+        const client = await Client({
+            host: host,
+            port: port,
+            username: user,
+            privateKey: privateKey
+        });
 
-        // SCP Command
-        const scpCommand: string = `scp -i ${keyPath} -P ${port} -r ${sourceFolder} ${user}@${host}:${destinationFolder}`;
-        
-        // Execute SCP
-        await exec.exec(scpCommand);
+        // Upload files
+        await client.uploadDir(sourceFolder, destinationFolder);
+
+        // Close the SCP connection
+        client.close();
+
+        core.info('Files uploaded successfully!');
 
     } catch (error: any) {
         core.setFailed(error.message);
