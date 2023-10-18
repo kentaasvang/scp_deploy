@@ -1,7 +1,6 @@
-// scp_deploy.ts
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import * as fs from 'fs';
+const fs = require("fs");
+const core = require("@actions/core");
+const exec = require("@actions/exec");
 
 async function run() {
     try {
